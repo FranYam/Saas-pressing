@@ -159,6 +159,21 @@ Quand les premiers pressings paient, **sans changer le code** :
   (R2 devient optionnel) — déploiement Docker + gunicorn + Nginx, à préparer
   ensemble le moment venu.
 
+## Et si 0,5 Go (Neon gratuit) ne suffit plus ?
+
+À proportion de ce projet, 0,5 Go ≈ **400 000+ commandes** (les médias sont
+sur R2, pas en base) : ~2 ans d'autonomie pour 10 pressings actifs. Surveiller
+l'occupation dans le dashboard Neon (Storage) chaque mois.
+
+Quand dépasser, par ordre de préférence :
+
+1. **VPS unique (~4 €/mois, ex. Hetzner CX22)** : PostgreSQL **et** l'API sur
+   la même machine — 40 Go SSD, toujours allumé, disque persistant (R2 devient
+   optionnel). Migration des données : `pg_dump | psql` en une commande.
+2. Neon Launch (10 Go) — simple mais ~19 $/mois : uniquement si vous voulez
+   rester 100 % managé.
+3. Supabase gratuit : même limite de 0,5 Go — aucun intérêt à migrer.
+
 ## Dépannage rapide
 
 | Symptôme | Cause probable |
