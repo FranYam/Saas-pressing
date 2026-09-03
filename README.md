@@ -80,6 +80,7 @@ docs/                 architecture, backlog, schéma OpenAPI
 | PATCH | `/api/v1/orders/{id}/assign-courier/` | Gérant | Assigne un coursier à la commande |
 | GET | `/api/v1/orders/my-deliveries/` | Coursier | Uniquement SES livraisons assignées |
 | PATCH | `/api/v1/orders/{id}/update-delivery/` | Coursier assigné / gérant | Cycle `A_COLLECTER→COLLECTE→A_LIVRER→LIVRE` |
+| GET | `/api/v1/dashboard/summary/` | Gérant | KPIs temps réel : CA jour/mois, commandes, créances, non réclamés |
 
 SMS automatiques : passage `PRET` → SMS au client (nom du pressing + ticket), journalisés dans `SmsNotification` (SIMULATED si passerelle non configurée, `tasks.py` prête pour Celery).
 
@@ -101,7 +102,9 @@ Documentation interactive : <http://127.0.0.1:8000/api/schema/swagger-ui/>
 | #9 | Passerelle Mobile Money (initiation + webhook signé) | ✅ |
 | #10 | Notifications SMS (signal PRET, relances 7 jours, Celery-ready) | ✅ |
 | #11 | Delivery : coursiers (rôle dédié), assignation, my-deliveries | ✅ |
-| #12 | Dashboard gérant (agrégations, IsGerant) | ⏳ dernière |
+| #12 | Dashboard gérant (agrégations SQL, IsGerant) | ✅ |
+
+**🎉 Backlog complet : 12/12 issues livrées — 171 tests verts.**
 
 ## Variables d'environnement
 

@@ -452,6 +452,23 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/dashboard/summary/:
+    get:
+      operationId: v1_dashboard_summary_retrieve
+      description: 'Agrégats du jour : chiffre d''affaires (jour/mois) consolidé depuis
+        tous les paiements, commandes en cours, encours des créances, nombre de clients
+        débiteurs et linges prêts non réclamés (> 7 jours).'
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummary'
+          description: ''
   /api/v1/deliveries/couriers/:
     get:
       operationId: v1_deliveries_couriers_list
@@ -1323,6 +1340,56 @@ components:
       - is_active
       - name
       - phone_number
+    DashboardSummary:
+      type: object
+      description: Indicateurs du jour — réservés au gérant (IsGerant).
+      properties:
+        date:
+          type: string
+          format: date
+          readOnly: true
+        revenue_today:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        revenue_month:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        orders_today:
+          type: integer
+          readOnly: true
+        orders_in_progress:
+          type: integer
+          readOnly: true
+        orders_ready:
+          type: integer
+          readOnly: true
+        outstanding_debts:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        debtors_count:
+          type: integer
+          readOnly: true
+        unclaimed:
+          type: array
+          items:
+            $ref: '#/components/schemas/UnclaimedOrder'
+          readOnly: true
+      required:
+      - date
+      - debtors_count
+      - orders_in_progress
+      - orders_ready
+      - orders_today
+      - outstanding_debts
+      - revenue_month
+      - revenue_today
+      - unclaimed
     DeliveryStatusEnum:
       enum:
       - A_COLLECTER
@@ -2128,6 +2195,36 @@ components:
           minLength: 1
       required:
       - token
+    UnclaimedOrder:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        ticket_number:
+          type: string
+          readOnly: true
+        client_name:
+          type: string
+          readOnly: true
+        client_phone:
+          type: string
+          readOnly: true
+        ready_since:
+          type: string
+          format: date-time
+          readOnly: true
+        days_waiting:
+          type: integer
+          readOnly: true
+      required:
+      - client_name
+      - client_phone
+      - days_waiting
+      - id
+      - ready_since
+      - ticket_number
     User:
       type: object
       description: Représentation d'un utilisateur de l'équipe (lecture seule).
