@@ -1,7 +1,7 @@
 """Tests de la permission IsSameTenant — accès unitaires (detail/update/destroy)."""
 from django.contrib.auth.models import AnonymousUser
 from django.test import TestCase
-from rest_framework.test import APIRequestFactory, force_authenticate
+from rest_framework.test import APIRequestFactory
 
 from apps.accounts.models import User
 from apps.core.permissions import IsEmploye, IsGerant, IsSameTenant
@@ -24,7 +24,7 @@ class IsSameTenantTests(TestCase):
 
     def authenticated_request(self, user):
         request = self.factory.get("/")
-        force_authenticate(request, user=user)
+        request.user = user
         return request
 
     def test_same_tenant_object_allowed(self):
@@ -85,7 +85,7 @@ class RolePermissionTests(TestCase):
 
     def request_for(self, user):
         request = self.factory.get("/")
-        force_authenticate(request, user=user)
+        request.user = user
         return request
 
     def test_is_gerant_allows_gerant(self):

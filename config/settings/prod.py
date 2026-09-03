@@ -24,6 +24,9 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = True
 SECURE_HSTS_PRELOAD = True
 
 # Fichiers statiques servis par WhiteNoise (collectstatic au déploiement).
+# WhiteNoise sert les fichiers statiques (collectstatic au déploiement).
+MIDDLEWARE.insert(1, "whitenoise.middleware.WhiteNoiseMiddleware")  # noqa: F405
+
 STORAGES = {
     **STORAGES,  # noqa: F405
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},

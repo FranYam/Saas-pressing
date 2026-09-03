@@ -13,3 +13,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 INTERNAL_IPS = ["127.0.0.1"]
 INSTALLED_APPS += ["debug_toolbar"]  # noqa: F405
 MIDDLEWARE = ["debug_toolbar.middleware.DebugToolbarMiddleware"] + MIDDLEWARE  # noqa: F405
+
+# Hachage rapide : les tests créent beaucoup d'utilisateurs, PBKDF2 les
+# ralentirait inutilement. À ne jamais mettre en production.
+PASSWORD_HASHERS = ["django.contrib.auth.hashers.MD5PasswordHasher"]
