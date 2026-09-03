@@ -5,33 +5,225 @@ info:
   description: API multi-tenant de gestion de pressings (commandes, paiements, notifications
     SMS, livraison) pour le marché du Burkina Faso.
 paths:
-  /api/v1/accounts/login/:
-    post:
-      operationId: v1_accounts_login_create
+  /api/v1/accounts/employees/:
+    get:
+      operationId: v1_accounts_employees_list
       description: |-
-        Takes a set of user credentials and returns an access and refresh JSON web
-        token pair to prove the authentication of those credentials.
+        Gestion de l'équipe du pressing connecté — réservée au gérant.
+
+        - List/retrieve : membres du pressing uniquement (TenantScopedQuerysetMixin) ;
+        - Create : rôle EMPLOYE et pressing forcés depuis le gérant authentifié ;
+        - Delete : désactivation (is_active=False), jamais de suppression physique —
+          l'historique des commandes rattachées doit rester traçable.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserList'
+          description: ''
+    post:
+      operationId: v1_accounts_employees_create
+      description: |-
+        Gestion de l'équipe du pressing connecté — réservée au gérant.
+
+        - List/retrieve : membres du pressing uniquement (TenantScopedQuerysetMixin) ;
+        - Create : rôle EMPLOYE et pressing forcés depuis le gérant authentifié ;
+        - Delete : désactivation (is_active=False), jamais de suppression physique —
+          l'historique des commandes rattachées doit rester traçable.
       tags:
       - v1
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/TokenObtainPairRequest'
+              $ref: '#/components/schemas/EmployeeCreateRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/TokenObtainPairRequest'
+              $ref: '#/components/schemas/EmployeeCreateRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/TokenObtainPairRequest'
+              $ref: '#/components/schemas/EmployeeCreateRequest'
         required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeCreate'
+          description: ''
+  /api/v1/accounts/employees/{id}/:
+    get:
+      operationId: v1_accounts_employees_retrieve
+      description: |-
+        Gestion de l'équipe du pressing connecté — réservée au gérant.
+
+        - List/retrieve : membres du pressing uniquement (TenantScopedQuerysetMixin) ;
+        - Create : rôle EMPLOYE et pressing forcés depuis le gérant authentifié ;
+        - Delete : désactivation (is_active=False), jamais de suppression physique —
+          l'historique des commandes rattachées doit rester traçable.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) utilisateur.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenObtainPair'
+                $ref: '#/components/schemas/User'
           description: ''
+    put:
+      operationId: v1_accounts_employees_update
+      description: |-
+        Gestion de l'équipe du pressing connecté — réservée au gérant.
+
+        - List/retrieve : membres du pressing uniquement (TenantScopedQuerysetMixin) ;
+        - Create : rôle EMPLOYE et pressing forcés depuis le gérant authentifié ;
+        - Delete : désactivation (is_active=False), jamais de suppression physique —
+          l'historique des commandes rattachées doit rester traçable.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) utilisateur.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeUpdate'
+          description: ''
+    patch:
+      operationId: v1_accounts_employees_partial_update
+      description: |-
+        Gestion de l'équipe du pressing connecté — réservée au gérant.
+
+        - List/retrieve : membres du pressing uniquement (TenantScopedQuerysetMixin) ;
+        - Create : rôle EMPLOYE et pressing forcés depuis le gérant authentifié ;
+        - Delete : désactivation (is_active=False), jamais de suppression physique —
+          l'historique des commandes rattachées doit rester traçable.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) utilisateur.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedEmployeeUpdateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedEmployeeUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedEmployeeUpdateRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmployeeUpdate'
+          description: ''
+    delete:
+      operationId: v1_accounts_employees_destroy
+      description: |-
+        Gestion de l'équipe du pressing connecté — réservée au gérant.
+
+        - List/retrieve : membres du pressing uniquement (TenantScopedQuerysetMixin) ;
+        - Create : rôle EMPLOYE et pressing forcés depuis le gérant authentifié ;
+        - Delete : désactivation (is_active=False), jamais de suppression physique —
+          l'historique des commandes rattachées doit rester traçable.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) utilisateur.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/accounts/login/:
+    post:
+      operationId: v1_accounts_login_create
+      description: POST /api/v1/accounts/login/ — paire de tokens JWT avec claims
+        role + pressing_id.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
   /api/v1/accounts/login/refresh/:
     post:
       operationId: v1_accounts_login_refresh_create
@@ -82,6 +274,22 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/v1/accounts/me/:
+    get:
+      operationId: v1_accounts_me_retrieve
+      description: GET /api/v1/accounts/me/ — profil de l'utilisateur connecté (tous
+        rôles).
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
   /api/v1/tenants/profile/:
     get:
       operationId: v1_tenants_profile_retrieve
@@ -179,6 +387,106 @@ paths:
           description: ''
 components:
   schemas:
+    EmployeeCreate:
+      type: object
+      description: Création d'un employé par le gérant — rôle et pressing forcés côté
+        serveur.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        username:
+          type: string
+          title: Nom d’utilisateur
+          description: Requis. 150 caractères maximum. Uniquement des lettres, nombres
+            et les caractères « @ », « . », « + », « - » et « _ ».
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - username
+    EmployeeCreateRequest:
+      type: object
+      description: Création d'un employé par le gérant — rôle et pressing forcés côté
+        serveur.
+      properties:
+        username:
+          type: string
+          minLength: 1
+          title: Nom d’utilisateur
+          description: Requis. 150 caractères maximum. Uniquement des lettres, nombres
+            et les caractères « @ », « . », « + », « - » et « _ ».
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+      required:
+      - password
+      - username
+    EmployeeUpdate:
+      type: object
+      description: 'Mise à jour d''un employé : infos, activation, réinitialisation
+        du mot de passe.'
+      properties:
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        is_active:
+          type: boolean
+          title: Actif
+          description: Précise si l’utilisateur doit être considéré comme actif. Décochez
+            ceci plutôt que de supprimer le compte.
+    EmployeeUpdateRequest:
+      type: object
+      description: 'Mise à jour d''un employé : infos, activation, réinitialisation
+        du mot de passe.'
+      properties:
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        is_active:
+          type: boolean
+          title: Actif
+          description: Précise si l’utilisateur doit être considéré comme actif. Décochez
+            ceci plutôt que de supprimer le compte.
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
     GerantCreateRequest:
       type: object
       description: Compte gérant créé simultanément au pressing lors de l'inscription.
@@ -206,6 +514,70 @@ components:
       required:
       - password
       - username
+    LoginRequest:
+      type: object
+      description: |-
+        Login par numéro de téléphone (username) + mot de passe.
+
+        Enrichit le JWT avec `role` et `pressing_id` : la PWA connaît le rôle de
+        l'utilisateur dès la connexion, sans requête supplémentaire.
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    PaginatedUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+    PatchedEmployeeUpdateRequest:
+      type: object
+      description: 'Mise à jour d''un employé : infos, activation, réinitialisation
+        du mot de passe.'
+      properties:
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+        is_active:
+          type: boolean
+          title: Actif
+          description: Précise si l’utilisateur doit être considéré comme actif. Décochez
+            ceci plutôt que de supprimer le compte.
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
     PatchedPressingRequest:
       type: object
       description: |-
@@ -368,32 +740,14 @@ components:
       required:
       - gerant
       - name
-    TokenObtainPair:
-      type: object
-      properties:
-        access:
-          type: string
-          readOnly: true
-        refresh:
-          type: string
-          readOnly: true
-      required:
-      - access
-      - refresh
-    TokenObtainPairRequest:
-      type: object
-      properties:
-        username:
-          type: string
-          writeOnly: true
-          minLength: 1
-        password:
-          type: string
-          writeOnly: true
-          minLength: 1
-      required:
-      - password
-      - username
+    RoleEnum:
+      enum:
+      - GERANT
+      - EMPLOYE
+      type: string
+      description: |-
+        * `GERANT` - Gérant
+        * `EMPLOYE` - Employé
     TokenRefresh:
       type: object
       properties:
@@ -422,6 +776,57 @@ components:
           minLength: 1
       required:
       - token
+    User:
+      type: object
+      description: Représentation d'un utilisateur de l'équipe (lecture seule).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        username:
+          type: string
+          readOnly: true
+          title: Nom d’utilisateur
+          description: Requis. 150 caractères maximum. Uniquement des lettres, nombres
+            et les caractères « @ », « . », « + », « - » et « _ ».
+        first_name:
+          type: string
+          readOnly: true
+          title: Prénom
+        last_name:
+          type: string
+          readOnly: true
+          title: Nom
+        role:
+          allOf:
+          - $ref: '#/components/schemas/RoleEnum'
+          readOnly: true
+          title: Rôle
+        pressing:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Actif
+          description: Précise si l’utilisateur doit être considéré comme actif. Décochez
+            ceci plutôt que de supprimer le compte.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - first_name
+      - id
+      - is_active
+      - last_name
+      - pressing
+      - role
+      - username
   securitySchemes:
     jwtAuth:
       type: http
