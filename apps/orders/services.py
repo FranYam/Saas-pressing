@@ -67,7 +67,11 @@ def update_commande_status(*, commande: Commande, new_status: str) -> Commande:
         )
 
     commande.status = new_status
-    commande.save(update_fields=["status", "updated_at"])
+    if new_status == Commande.Status.PRET:
+        commande.date_pret = timezone.now()  # cible des relances SMS (Issue #10)
+    commande.save(update_fields=["status", "date_pret", "updated_at"])
+
+    # Le signal post_save déclenche le SMS « prêt » (apps/notifications/signals.py).
     return commande
 
 

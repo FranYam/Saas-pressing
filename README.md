@@ -69,6 +69,15 @@ docs/                 architecture, backlog, schéma OpenAPI
 | CRUD | `/api/v1/clients/` | Authentifié | Répertoire clients du pressing (`?search=` par préfixe téléphone ou nom) |
 | GET/POST | `/api/v1/orders/` | Authentifié | Commandes + articles imbriqués (`?status=`, `?client=`, total calculé serveur) |
 | PATCH | `/api/v1/orders/{id}/update_status/` | Authentifié | Cycle `RECU→EN_TRAITEMENT→PRET→LIVRE` validé (reçu texte inclus) |
+| GET/POST | `/api/v1/payments/` | Authentifié | Règlements (statut calculé serveur, immuables, `?commande=`) |
+| GET | `/api/v1/payments/client-balance/?client=` | Authentifié | Solde consolidé du client (dû, payé, reste, détail) |
+| GET | `/api/v1/payments/debtors/` | Gérant | Clients avec créance > 0 |
+| POST | `/api/v1/payments-gateway/initiate/` | Authentifié | Push Mobile Money (Orange/Moov) sur le reste à payer |
+| POST | `/api/v1/payments-gateway/webhook/{operator}/` | Public + HMAC-SHA256 | Confirmation opérateur (idempotente, montant vérifié) |
+| GET | `/api/v1/payments-gateway/requests/` | Authentifié | Suivi des demandes Mobile Money du pressing |
+| — | `python manage.py send_reminders` | Cron / celery-beat | Relance SMS : linge prêt non retiré > 7 jours |
+
+SMS automatiques : passage `PRET` → SMS au client (nom du pressing + ticket), journalisés dans `SmsNotification` (SIMULATED si passerelle non configurée, `tasks.py` prête pour Celery).
 
 Documentation interactive : <http://127.0.0.1:8000/api/schema/swagger-ui/>
 
@@ -84,7 +93,10 @@ Documentation interactive : <http://127.0.0.1:8000/api/schema/swagger-ui/>
 | #5 | Clients : répertoire & recherche par téléphone | ✅ |
 | #6 | Orders : commande + articles, création transactionnelle | ✅ |
 | #7 | Orders : ticket unique TX-YYMM-NNN + cycle de vie validé | ✅ |
-| #8-#12 | Payments, Gateway, SMS, Delivery, Dashboard | ⏳ prochaine : #8 |
+| #8 | Payments : règlements, soldes clients, créances (debtors) | ✅ |
+| #9 | Passerelle Mobile Money (initiation + webhook signé) | ✅ |
+| #10 | Notifications SMS (signal PRET, relances 7 jours, Celery-ready) | ✅ |
+| #11-#12 | Delivery, Dashboard | ⏳ prochaine : #11 |
 
 ## Variables d'environnement
 

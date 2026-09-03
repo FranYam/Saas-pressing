@@ -152,6 +152,8 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
     "COMPONENT_SPLIT_REQUEST": True,
     "SWAGGER_UI_SETTINGS": {"persistAuthorization": True},
+    # NB : 2 avertissements de nommage d'enum (« status ») sont connus et
+    # cosmétiques — le schéma généré est correct.
 }
 
 # ---------------------------------------------------------------------------
@@ -193,6 +195,35 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+# ---------------------------------------------------------------------------
+# Passerelle Mobile Money (Issue #9) — Orange Money / Moov Money
+# Valeurs vides par défaut : l'initiation échoue proprement (503/400) tant
+# que l'opérateur n'est pas configuré. Jamais de secrets en dur ici.
+# ---------------------------------------------------------------------------
+MOBILE_MONEY = {
+    "ORANGE": {
+        "API_URL": env("ORANGE_MONEY_API_URL", default=""),
+        "API_KEY": env("ORANGE_MONEY_API_KEY", default=""),
+        "WEBHOOK_SECRET": env("ORANGE_WEBHOOK_SECRET", default=""),
+    },
+    "MOOV": {
+        "API_URL": env("MOOV_MONEY_API_URL", default=""),
+        "API_KEY": env("MOOV_MONEY_API_KEY", default=""),
+        "WEBHOOK_SECRET": env("MOOV_WEBHOOK_SECRET", default=""),
+    },
+}
+
+# ---------------------------------------------------------------------------
+# Passerelle SMS (Issue #10) — agrégateur local/régional.
+# URL vide = mode simulation : les SMS sont journalisés (SIMULATED) mais
+# jamais envoyés — idéal en dev/pilote sans agrégateur.
+# ---------------------------------------------------------------------------
+SMS_GATEWAY = {
+    "API_URL": env("SMS_API_URL", default=""),
+    "API_KEY": env("SMS_API_KEY", default=""),
+    "SENDER_ID": env("SMS_SENDER_ID", default=""),
+}
 
 # ---------------------------------------------------------------------------
 # Logs

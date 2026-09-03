@@ -29,6 +29,13 @@ class Commande(UUIDModel, TimeStampedModel):
         COMPTOIR = "COMPTOIR", "Comptoir"
         EN_LIGNE = "EN_LIGNE", "En ligne"
 
+    class PaymentStatus(models.TextChoices):
+        """Statut du règlement — mis à jour à chaque paiement (Issue #8)."""
+
+        PAYE = "PAYE", "Payé"
+        PARTIEL = "PARTIEL", "Partiel"
+        CREDIT = "CREDIT", "Crédit"
+
     client = models.ForeignKey(
         "clients.Client",
         verbose_name="client",
@@ -47,11 +54,19 @@ class Commande(UUIDModel, TimeStampedModel):
     status = models.CharField(
         "statut", max_length=20, choices=Status.choices, default=Status.RECU
     )
+    payment_status = models.CharField(
+        "statut paiement",
+        max_length=10,
+        choices=PaymentStatus.choices,
+        default=PaymentStatus.CREDIT,  # impayé tant qu'aucun règlement n'est enregistré
+    )
     canal = models.CharField(
         "canal", max_length=10, choices=Canal.choices, default=Canal.COMPTOIR
     )
     date_depot = models.DateTimeField("date de dépôt")
     date_retrait_prevue = models.DateTimeField("date de retrait prévue")
+    # Renseigné au passage PRET (orders/services) — cible des relances > 7 jours.
+    date_pret = models.DateTimeField("passé prêt le", null=True, blank=True)
     total_price = models.DecimalField(
         "montant total", max_digits=10, decimal_places=2, default=0
     )

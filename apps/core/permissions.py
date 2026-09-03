@@ -44,3 +44,13 @@ class IsEmploye(permissions.BasePermission):
     def has_permission(self, request, view):
         user = request.user
         return user.is_authenticated and user.role == get_user_model().Role.EMPLOYE
+
+
+class IsCoursier(permissions.BasePermission):
+    """Accès réservé au rôle Coursier (livraisons assignées)."""
+
+    message = "Action réservée aux coursiers du pressing."
+
+    def has_permission(self, request, view):
+        user = request.user
+        return user.is_authenticated and user.role == get_user_model().Role.COURSIER

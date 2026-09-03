@@ -597,6 +597,233 @@ paths:
               schema:
                 $ref: '#/components/schemas/Commande'
           description: ''
+  /api/v1/payments/:
+    get:
+      operationId: v1_payments_list
+      description: Règlements du pressing connecté — tout le personnel authentifié.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPaiementList'
+          description: ''
+    post:
+      operationId: v1_payments_create
+      description: Règlements du pressing connecté — tout le personnel authentifié.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaiementRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PaiementRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PaiementRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Paiement'
+          description: ''
+  /api/v1/payments-gateway/initiate/:
+    post:
+      operationId: v1_payments_gateway_initiate_create
+      description: Déclenche un push Mobile Money (Orange/Moov) pour le reste à payer
+        de la commande. Le montant est calculé serveur.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InitiateMobileMoneyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/InitiateMobileMoneyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/InitiateMobileMoneyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileMoneyRequest'
+          description: ''
+        '400':
+          description: No response body
+        '404':
+          description: No response body
+  /api/v1/payments-gateway/requests/:
+    get:
+      operationId: v1_payments_gateway_requests_list
+      description: Suivi des demandes Mobile Money du pressing connecté (lecture seule).
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedMobileMoneyRequestList'
+          description: ''
+  /api/v1/payments-gateway/requests/{id}/:
+    get:
+      operationId: v1_payments_gateway_requests_retrieve
+      description: Suivi des demandes Mobile Money du pressing connecté (lecture seule).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) demande Mobile Money.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MobileMoneyRequest'
+          description: ''
+  /api/v1/payments-gateway/webhook/{operator}/:
+    post:
+      operationId: v1_payments_gateway_webhook_create
+      description: 'Callback opérateur : corps signé HMAC-SHA256 (en-tête X-Signature,
+        secret partagé par opérateur). Idempotent — un webhook rejoué ne crée pas
+        de double paiement.'
+      parameters:
+      - in: path
+        name: operator
+        schema:
+          type: string
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MobileMoneyWebhookRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/MobileMoneyWebhookRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/MobileMoneyWebhookRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          description: No response body
+        '400':
+          description: No response body
+        '403':
+          description: No response body
+        '404':
+          description: No response body
+  /api/v1/payments/{id}/:
+    get:
+      operationId: v1_payments_retrieve
+      description: Règlements du pressing connecté — tout le personnel authentifié.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) paiement.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Paiement'
+          description: ''
+  /api/v1/payments/client-balance/:
+    get:
+      operationId: v1_payments_client_balance_retrieve
+      description: 'Solde consolidé d''un client : ?client=<uuid> (fiche client).'
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Paiement'
+          description: ''
+  /api/v1/payments/debtors/:
+    get:
+      operationId: v1_payments_debtors_retrieve
+      description: Clients du pressing ayant un solde débiteur > 0 (gérant).
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Paiement'
+          description: ''
   /api/v1/tenants/profile/:
     get:
       operationId: v1_tenants_profile_retrieve
@@ -762,9 +989,14 @@ components:
           format: uuid
         status:
           allOf:
-          - $ref: '#/components/schemas/StatusEnum'
+          - $ref: '#/components/schemas/CommandeStatusEnum'
           readOnly: true
           title: Statut
+        payment_status:
+          allOf:
+          - $ref: '#/components/schemas/PaymentStatusEnum'
+          readOnly: true
+          title: Statut paiement
         canal:
           $ref: '#/components/schemas/CanalEnum'
         date_depot:
@@ -801,6 +1033,7 @@ components:
       - date_depot
       - date_retrait_prevue
       - id
+      - payment_status
       - receipt
       - status
       - ticket_number
@@ -825,6 +1058,18 @@ components:
       - articles
       - client
       - date_retrait_prevue
+    CommandeStatusEnum:
+      enum:
+      - RECU
+      - EN_TRAITEMENT
+      - PRET
+      - LIVRE
+      type: string
+      description: |-
+        * `RECU` - Reçu
+        * `EN_TRAITEMENT` - En traitement
+        * `PRET` - Prêt
+        * `LIVRE` - Livré
     EmployeeCreate:
       type: object
       description: Création d'un employé par le gérant — rôle et pressing forcés côté
@@ -952,6 +1197,23 @@ components:
       required:
       - password
       - username
+    InitiateMobileMoneyRequest:
+      type: object
+      description: 'Payload d''initiation : commande + téléphone payeur + opérateur.'
+      properties:
+        commande:
+          type: string
+          format: uuid
+        phone_number:
+          type: string
+          minLength: 1
+          maxLength: 32
+        operator:
+          $ref: '#/components/schemas/OperatorEnum'
+      required:
+      - commande
+      - operator
+      - phone_number
     LoginRequest:
       type: object
       description: |-
@@ -971,6 +1233,116 @@ components:
       required:
       - password
       - username
+    MobileMoneyRequest:
+      type: object
+      description: Représentation d'une demande Mobile Money (lecture).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        commande:
+          type: string
+          format: uuid
+          readOnly: true
+        operator:
+          allOf:
+          - $ref: '#/components/schemas/OperatorEnum'
+          readOnly: true
+          title: Opérateur
+        phone_number:
+          type: string
+          readOnly: true
+          title: Téléphone payeur
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+          title: Montant demandé
+        status:
+          allOf:
+          - $ref: '#/components/schemas/MobileMoneyStatusEnum'
+          readOnly: true
+          title: Statut
+        provider_ref:
+          type: string
+          readOnly: true
+          title: Référence opérateur
+        error_message:
+          type: string
+          readOnly: true
+          title: Message d'erreur
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - commande
+      - created_at
+      - error_message
+      - id
+      - operator
+      - phone_number
+      - provider_ref
+      - status
+    MobileMoneyStatusEnum:
+      enum:
+      - PENDING
+      - CONFIRMED
+      - FAILED
+      - CANCELLED
+      type: string
+      description: |-
+        * `PENDING` - En attente
+        * `CONFIRMED` - Confirmée
+        * `FAILED` - Échouée
+        * `CANCELLED` - Annulée
+    MobileMoneyWebhookRequest:
+      type: object
+      properties:
+        reference:
+          type: string
+          minLength: 1
+          description: Référence opérateur ou UUID de la demande
+        status:
+          $ref: '#/components/schemas/MobileMoneyWebhookStatusEnum'
+        amount:
+          type: string
+          minLength: 1
+        message:
+          type: string
+          minLength: 1
+      required:
+      - reference
+      - status
+    MobileMoneyWebhookStatusEnum:
+      enum:
+      - SUCCESS
+      - FAILED
+      type: string
+      description: |-
+        * `SUCCESS` - SUCCESS
+        * `FAILED` - FAILED
+    ModeEnum:
+      enum:
+      - ESPECES
+      - MOBILE_MONEY
+      - CREDIT
+      type: string
+      description: |-
+        * `ESPECES` - Espèces
+        * `MOBILE_MONEY` - Mobile Money
+        * `CREDIT` - Crédit
+    OperatorEnum:
+      enum:
+      - ORANGE
+      - MOOV
+      type: string
+      description: |-
+        * `ORANGE` - Orange Money
+        * `MOOV` - Moov Money
     OrderItem:
       type: object
       properties:
@@ -1059,6 +1431,52 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Commande'
+    PaginatedMobileMoneyRequestList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/MobileMoneyRequest'
+    PaginatedPaiementList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Paiement'
     PaginatedUserList:
       type: object
       required:
@@ -1082,6 +1500,63 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/User'
+    Paiement:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        commande:
+          type: string
+          format: uuid
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
+        date_paiement:
+          type: string
+          format: date-time
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusFa8Enum'
+          readOnly: true
+          title: Statut
+        pressing:
+          type: string
+          format: uuid
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - amount
+      - commande
+      - created_at
+      - id
+      - pressing
+      - status
+    PaiementRequest:
+      type: object
+      properties:
+        commande:
+          type: string
+          format: uuid
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        mode:
+          $ref: '#/components/schemas/ModeEnum'
+        date_paiement:
+          type: string
+          format: date-time
+      required:
+      - amount
+      - commande
     PatchedClientRequest:
       type: object
       properties:
@@ -1169,6 +1644,16 @@ components:
           title: Couleur secondaire
           pattern: ^#[0-9A-Fa-f]{6}$
           maxLength: 7
+    PaymentStatusEnum:
+      enum:
+      - PAYE
+      - PARTIEL
+      - CREDIT
+      type: string
+      description: |-
+        * `PAYE` - Payé
+        * `PARTIEL` - Partiel
+        * `CREDIT` - Crédit
     Pressing:
       type: object
       description: |-
@@ -1302,18 +1787,16 @@ components:
       description: |-
         * `GERANT` - Gérant
         * `EMPLOYE` - Employé
-    StatusEnum:
+    StatusFa8Enum:
       enum:
-      - RECU
-      - EN_TRAITEMENT
-      - PRET
-      - LIVRE
+      - PAYE
+      - PARTIEL
+      - CREDIT
       type: string
       description: |-
-        * `RECU` - Reçu
-        * `EN_TRAITEMENT` - En traitement
-        * `PRET` - Prêt
-        * `LIVRE` - Livré
+        * `PAYE` - Payé
+        * `PARTIEL` - Partiel
+        * `CREDIT` - Crédit
     TokenRefresh:
       type: object
       properties:

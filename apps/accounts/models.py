@@ -21,6 +21,7 @@ class User(UUIDModel, TimeStampedModel, AbstractUser):
     class Role(models.TextChoices):
         GERANT = "GERANT", "Gérant"
         EMPLOYE = "EMPLOYE", "Employé"
+        COURSIER = "COURSIER", "Coursier"
 
     role = models.CharField(
         "rôle",
