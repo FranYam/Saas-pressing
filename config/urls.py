@@ -16,8 +16,8 @@ from rest_framework.permissions import AllowAny
 
 api_v1 = [
     path("accounts/", include("apps.accounts.urls")),
+    path("tenants/", include("apps.tenants.urls")),
     # Apps montées au fil des issues du backlog :
-    # path("tenants/", include("apps.tenants.urls")),           # Issue #3
     # path("clients/", include("apps.clients.urls")),           # Issue #5
     # path("orders/", include("apps.orders.urls")),             # Issues #6-#7
     # path("payments/", include("apps.payments.urls")),         # Issue #8

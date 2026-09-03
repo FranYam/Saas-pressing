@@ -1,0 +1,10 @@
+# Configuration ggshield (CLI GitGuardian) — schéma v2.
+# Doc : https://docs.gitguardian.com/ggshield-docs/configuration
+version: 2
+
+secret:
+  # Fichiers sans secrets réels : fixtures de tests (mots de passe factices
+  # type "secret123") et modèle d'environnement (placeholders documentaires).
+  ignored_paths:
+    - "**/tests/**"
+    - ".env.example"

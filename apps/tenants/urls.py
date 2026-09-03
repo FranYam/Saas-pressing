@@ -1,4 +1,11 @@
-"""Routes tenants — montées dans config/urls.py à l'Issue #3
-(inscription publique /api/v1/tenants/register/, profil et customisation).
-"""
-urlpatterns: list = []
+"""Routes tenants — inscription publique et profil (theming PWA)."""
+from django.urls import path
+
+from apps.tenants.views import PressingProfileView, PressingRegisterView
+
+app_name = "tenants"
+
+urlpatterns = [
+    path("register/", PressingRegisterView.as_view(), name="register"),
+    path("profile/", PressingProfileView.as_view(), name="profile"),
+]

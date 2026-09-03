@@ -82,8 +82,292 @@ paths:
       responses:
         '200':
           description: No response body
+  /api/v1/tenants/profile/:
+    get:
+      operationId: v1_tenants_profile_retrieve
+      description: GET/PATCH /api/v1/tenants/profile/ — branding du pressing connecté.
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pressing'
+          description: ''
+    put:
+      operationId: v1_tenants_profile_update
+      description: GET/PATCH /api/v1/tenants/profile/ — branding du pressing connecté.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PressingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PressingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PressingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pressing'
+          description: ''
+    patch:
+      operationId: v1_tenants_profile_partial_update
+      description: GET/PATCH /api/v1/tenants/profile/ — branding du pressing connecté.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPressingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPressingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPressingRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pressing'
+          description: ''
+  /api/v1/tenants/register/:
+    post:
+      operationId: v1_tenants_register_create
+      description: 'Inscrit un pressing et son utilisateur gérant en une requête atomique.
+        Réponse : détails de l''établissement + paire de tokens JWT (`access` / `refresh`).'
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterPressingRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RegisterPressingRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RegisterPressingRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Pressing'
+          description: ''
 components:
   schemas:
+    GerantCreateRequest:
+      type: object
+      description: Compte gérant créé simultanément au pressing lors de l'inscription.
+      properties:
+        username:
+          type: string
+          minLength: 1
+          title: Nom d’utilisateur
+          description: Requis. 150 caractères maximum. Uniquement des lettres, nombres
+            et les caractères « @ », « . », « + », « - » et « _ ».
+          pattern: ^[\w.@+-]+$
+          maxLength: 150
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+        first_name:
+          type: string
+          title: Prénom
+          maxLength: 150
+        last_name:
+          type: string
+          title: Nom
+          maxLength: 150
+      required:
+      - password
+      - username
+    PatchedPressingRequest:
+      type: object
+      description: |-
+        Représentation d'un pressing — consommé par la PWA pour le theming
+        (logo + couleurs appliqués aux variables CSS --primary-color / --secondary-color).
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nom
+          maxLength: 255
+        address:
+          type: string
+          title: Adresse
+        phone:
+          type: string
+          title: Téléphone
+          maxLength: 32
+        owner_name:
+          type: string
+          title: Propriétaire
+          maxLength: 255
+        logo:
+          type: string
+          format: binary
+        primary_color:
+          type: string
+          minLength: 1
+          title: Couleur primaire
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        secondary_color:
+          type: string
+          minLength: 1
+          title: Couleur secondaire
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+    Pressing:
+      type: object
+      description: |-
+        Représentation d'un pressing — consommé par la PWA pour le theming
+        (logo + couleurs appliqués aux variables CSS --primary-color / --secondary-color).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          title: Nom
+          maxLength: 255
+        address:
+          type: string
+          title: Adresse
+        phone:
+          type: string
+          title: Téléphone
+          maxLength: 32
+        owner_name:
+          type: string
+          title: Propriétaire
+          maxLength: 255
+        logo:
+          type: string
+          format: uri
+          nullable: true
+        primary_color:
+          type: string
+          title: Couleur primaire
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        secondary_color:
+          type: string
+          title: Couleur secondaire
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - name
+    PressingRequest:
+      type: object
+      description: |-
+        Représentation d'un pressing — consommé par la PWA pour le theming
+        (logo + couleurs appliqués aux variables CSS --primary-color / --secondary-color).
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Nom
+          maxLength: 255
+        address:
+          type: string
+          title: Adresse
+        phone:
+          type: string
+          title: Téléphone
+          maxLength: 32
+        owner_name:
+          type: string
+          title: Propriétaire
+          maxLength: 255
+        logo:
+          type: string
+          format: binary
+        primary_color:
+          type: string
+          minLength: 1
+          title: Couleur primaire
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        secondary_color:
+          type: string
+          minLength: 1
+          title: Couleur secondaire
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+      required:
+      - name
+    RegisterPressingRequest:
+      type: object
+      description: |-
+        Inscription publique : crée le pressing ET son utilisateur gérant en
+        une seule requête (voir tenants/services.register_pressing — transaction
+        atomique : si le gérant est invalide, le pressing n'est pas créé).
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        address:
+          type: string
+        phone:
+          type: string
+          maxLength: 32
+        owner_name:
+          type: string
+          maxLength: 255
+        logo:
+          type: string
+          format: binary
+        primary_color:
+          type: string
+          minLength: 1
+          default: '#1E90FF'
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        secondary_color:
+          type: string
+          minLength: 1
+          default: '#FF8C00'
+          pattern: ^#[0-9A-Fa-f]{6}$
+          maxLength: 7
+        gerant:
+          $ref: '#/components/schemas/GerantCreateRequest'
+      required:
+      - gerant
+      - name
     TokenObtainPair:
       type: object
       properties:
@@ -138,3 +422,8 @@ components:
           minLength: 1
       required:
       - token
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

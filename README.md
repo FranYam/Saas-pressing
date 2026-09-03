@@ -55,6 +55,20 @@ requirements/         base.txt / dev.txt / prod.txt
 docs/                 architecture, backlog, schéma OpenAPI
 ```
 
+## Endpoints disponibles
+
+| Méthode | Endpoint | Accès | Description |
+|---|---|---|---|
+| POST | `/api/v1/tenants/register/` | Public | Inscrit un pressing + son gérant (atomique), retourne JWT |
+| GET | `/api/v1/tenants/profile/` | Authentifié | Branding du pressing (theming PWA) |
+| PATCH | `/api/v1/tenants/profile/` | Gérant | Customisation logo / couleurs |
+| POST | `/api/v1/accounts/login/` | Public | JWT (téléphone + mot de passe), claims `role`/`pressing_id` |
+| POST | `/api/v1/accounts/login/refresh/` · `/verify/` | Public | Cycle de vie des tokens |
+| GET | `/api/v1/accounts/me/` | Authentifié | Profil de l'utilisateur connecté |
+| CRUD | `/api/v1/accounts/employees/` | Gérant | Équipe du pressing (DELETE = désactivation) |
+
+Documentation interactive : <http://127.0.0.1:8000/api/schema/swagger-ui/>
+
 ## Avancement du backlog
 
 | Issue | Contenu | Statut |
@@ -62,9 +76,10 @@ docs/                 architecture, backlog, schéma OpenAPI
 | #1 | Initialisation & configuration multi-environnement | ✅ |
 | #2 | Isolation multi-tenant (core : mixin + permission) | ✅ |
 | — | Fondation modèles `Pressing` + `User` (JWT opérationnel) | ✅ |
-| #3 | Tenants : inscription + customisation visuelle | ⏳ prochaine |
-| #4 | Accounts : gestion employés, RBAC complet | ⏳ |
-| #5-#12 | Clients, Orders, Payments, Gateway, SMS, Delivery, Dashboard | ⏳ |
+| #3 | Tenants : inscription + customisation visuelle | ✅ |
+| #4 | Accounts : JWT claims, /me/, gestion équipe (RBAC) | ✅ |
+| #5 | Clients : répertoire & recherche par téléphone | ⏳ prochaine |
+| #6-#12 | Orders, Payments, Gateway, SMS, Delivery, Dashboard | ⏳ |
 
 ## Variables d'environnement
 
