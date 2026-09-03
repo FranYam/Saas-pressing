@@ -7,7 +7,11 @@ from rest_framework.test import APIRequestFactory
 
 from apps.accounts.models import User
 from apps.core.mixins import TenantScopedQuerysetMixin
+from apps.core.tests.utils import fake_password
 from apps.tenants.models import Pressing
+
+# Identifiants générés à l'exécution : aucun littéral dans le dépôt.
+PASSWORD = fake_password()
 
 
 class UserOnlyViewSet(TenantScopedQuerysetMixin, viewsets.ModelViewSet):
@@ -29,19 +33,19 @@ class TenantScopedQuerysetMixinTests(TestCase):
 
         self.user_a1 = User.objects.create_user(
             username="70000001",
-            password="secret123",
+            password=PASSWORD,
             role=User.Role.GERANT,
             pressing=self.pressing_a,
         )
         User.objects.create_user(
             username="70000002",
-            password="secret123",
+            password=PASSWORD,
             role=User.Role.EMPLOYE,
             pressing=self.pressing_a,
         )
         User.objects.create_user(
             username="70000003",
-            password="secret123",
+            password=PASSWORD,
             role=User.Role.GERANT,
             pressing=self.pressing_b,
         )
@@ -66,7 +70,7 @@ class TenantScopedQuerysetMixinTests(TestCase):
 
     def test_user_without_pressing_sees_nothing(self):
         """Fail-closed : sans pressing, on ne renvoie pas « tout » par défaut."""
-        orphan = User.objects.create_user(username="70000009", password="secret123")
+        orphan = User.objects.create_user(username="70000009", password=PASSWORD)
         self.assertFalse(self.queryset_for(orphan).exists())
 
     def test_anonymous_user_sees_nothing(self):
@@ -76,6 +80,6 @@ class TenantScopedQuerysetMixinTests(TestCase):
 
     def test_superuser_sees_everything(self):
         """Le super-admin plateforme (sans pressing) passe outre le filtre."""
-        User.objects.create_superuser(username="admin", password="secret123")
+        User.objects.create_superuser(username="admin", password=PASSWORD)
         admin = User.objects.get(username="admin")
         self.assertEqual(self.queryset_for(admin).count(), 4)

@@ -14,10 +14,12 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from apps.accounts.models import User
+from apps.core.tests.utils import fake_password
 from apps.tenants.models import Pressing
 
-# Assez robuste pour les validateurs de mot de passe Django.
-PASSWORD = "MotDePasse-Faso-2026"
+# Identifiant généré à l'exécution : conforme aux validateurs Django et
+# absent du code source (règle anti-fuite).
+PASSWORD = fake_password()
 
 
 def logo_upload():

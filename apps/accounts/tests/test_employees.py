@@ -10,10 +10,13 @@ from rest_framework import status
 from rest_framework.test import APIClient
 from rest_framework_simplejwt.state import token_backend
 
+from apps.core.tests.utils import fake_password
 from apps.tenants.models import Pressing
 
 User = get_user_model()
-PASSWORD = "MotDePasse-Faso-2026"
+# Identifiants générés à l'exécution : aucun littéral dans le dépôt.
+PASSWORD = fake_password()
+NEW_PASSWORD = fake_password()
 
 
 class EmployeeManagementTests(TestCase):
@@ -129,14 +132,14 @@ class EmployeeManagementTests(TestCase):
 
         response = self.client.patch(
             self.detail_url(self.employe_a),
-            {"password": "NouveauMotDePasse-2026"},
+            {"password": NEW_PASSWORD},
             format="json",
         )
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         login = self.client.post(
             reverse("accounts:token_obtain_pair"),
-            {"username": "70000002", "password": "NouveauMotDePasse-2026"},
+            {"username": "70000002", "password": NEW_PASSWORD},
             format="json",
         )
         self.assertEqual(login.status_code, status.HTTP_200_OK)

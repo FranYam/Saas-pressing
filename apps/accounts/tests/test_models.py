@@ -2,12 +2,13 @@
 from django.test import TestCase
 
 from apps.accounts.models import User
+from apps.core.tests.utils import fake_password
 from apps.tenants.models import Pressing
 
 
 class UserModelTests(TestCase):
     def test_role_defaults_to_employe(self):
-        user = User.objects.create_user(username="70112233", password="secret123")
+        user = User.objects.create_user(username="70112233", password=fake_password())
 
         self.assertEqual(user.role, User.Role.EMPLOYE)  # moindre privilège
         self.assertIsNone(user.pressing)
@@ -17,7 +18,7 @@ class UserModelTests(TestCase):
         pressing = Pressing.objects.create(name="Pressing A")
         user = User.objects.create_user(
             username="70112233",
-            password="secret123",
+            password=fake_password(),
             role=User.Role.GERANT,
             pressing=pressing,
         )

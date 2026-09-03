@@ -5,7 +5,11 @@ from rest_framework.test import APIRequestFactory
 
 from apps.accounts.models import User
 from apps.core.permissions import IsEmploye, IsGerant, IsSameTenant
+from apps.core.tests.utils import fake_password
 from apps.tenants.models import Pressing
+
+# Identifiants générés à l'exécution : aucun littéral dans le dépôt.
+PASSWORD = fake_password()
 
 
 class IsSameTenantTests(TestCase):
@@ -17,7 +21,7 @@ class IsSameTenantTests(TestCase):
         self.pressing_b = Pressing.objects.create(name="Pressing B")
         self.user_a = User.objects.create_user(
             username="70000001",
-            password="secret123",
+            password=PASSWORD,
             role=User.Role.GERANT,
             pressing=self.pressing_a,
         )
@@ -29,36 +33,36 @@ class IsSameTenantTests(TestCase):
 
     def test_same_tenant_object_allowed(self):
         obj = User.objects.create_user(
-            username="70000002", password="secret123", pressing=self.pressing_a
+            username="70000002", password=PASSWORD, pressing=self.pressing_a
         )
         request = self.authenticated_request(self.user_a)
         self.assertTrue(IsSameTenant().has_object_permission(request, None, obj))
 
     def test_cross_tenant_object_denied(self):
         obj = User.objects.create_user(
-            username="70000003", password="secret123", pressing=self.pressing_b
+            username="70000003", password=PASSWORD, pressing=self.pressing_b
         )
         request = self.authenticated_request(self.user_a)
         self.assertFalse(IsSameTenant().has_object_permission(request, None, obj))
 
     def test_object_without_pressing_denied(self):
         """Fail-closed : une ressource sans pressing n'est accessible à personne."""
-        obj = User.objects.create_user(username="70000009", password="secret123")
+        obj = User.objects.create_user(username="70000009", password=PASSWORD)
         request = self.authenticated_request(self.user_a)
         self.assertFalse(IsSameTenant().has_object_permission(request, None, obj))
 
     def test_anonymous_denied(self):
         obj = User.objects.create_user(
-            username="70000002", password="secret123", pressing=self.pressing_a
+            username="70000002", password=PASSWORD, pressing=self.pressing_a
         )
         request = self.factory.get("/")
         request.user = AnonymousUser()
         self.assertFalse(IsSameTenant().has_object_permission(request, None, obj))
 
     def test_superuser_allowed(self):
-        admin = User.objects.create_superuser(username="admin", password="secret123")
+        admin = User.objects.create_superuser(username="admin", password=PASSWORD)
         obj = User.objects.create_user(
-            username="70000003", password="secret123", pressing=self.pressing_b
+            username="70000003", password=PASSWORD, pressing=self.pressing_b
         )
         request = self.authenticated_request(admin)
         self.assertTrue(IsSameTenant().has_object_permission(request, None, obj))
@@ -72,13 +76,13 @@ class RolePermissionTests(TestCase):
         self.pressing = Pressing.objects.create(name="Pressing A")
         self.gerant = User.objects.create_user(
             username="70000001",
-            password="secret123",
+            password=PASSWORD,
             role=User.Role.GERANT,
             pressing=self.pressing,
         )
         self.employe = User.objects.create_user(
             username="70000002",
-            password="secret123",
+            password=PASSWORD,
             role=User.Role.EMPLOYE,
             pressing=self.pressing,
         )

@@ -3,8 +3,11 @@
 version: 2
 
 secret:
-  # Fichiers sans secrets réels : fixtures de tests (mots de passe factices
-  # type "secret123") et modèle d'environnement (placeholders documentaires).
+  # Fichiers sans secrets réels : fixtures de tests (identifiants générés
+  # à l'exécution, voir apps/core/tests/utils.py) et modèle d'environnement
+  # (placeholders documentaires).
+  # NB : ce fichier ne configure QUE ggshield ; la surveillance hébergée
+  # (e-mails d'alerte) se règle dans le dashboard GitGuardian.
   ignored_paths:
     - "**/tests/**"
     - ".env.example"
