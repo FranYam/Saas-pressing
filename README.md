@@ -76,6 +76,10 @@ docs/                 architecture, backlog, schéma OpenAPI
 | POST | `/api/v1/payments-gateway/webhook/{operator}/` | Public + HMAC-SHA256 | Confirmation opérateur (idempotente, montant vérifié) |
 | GET | `/api/v1/payments-gateway/requests/` | Authentifié | Suivi des demandes Mobile Money du pressing |
 | — | `python manage.py send_reminders` | Cron / celery-beat | Relance SMS : linge prêt non retiré > 7 jours |
+| CRUD | `/api/v1/deliveries/couriers/` | Gérant (écriture) | Coursiers + compte de connexion (rôle COURSIER) |
+| PATCH | `/api/v1/orders/{id}/assign-courier/` | Gérant | Assigne un coursier à la commande |
+| GET | `/api/v1/orders/my-deliveries/` | Coursier | Uniquement SES livraisons assignées |
+| PATCH | `/api/v1/orders/{id}/update-delivery/` | Coursier assigné / gérant | Cycle `A_COLLECTER→COLLECTE→A_LIVRER→LIVRE` |
 
 SMS automatiques : passage `PRET` → SMS au client (nom du pressing + ticket), journalisés dans `SmsNotification` (SIMULATED si passerelle non configurée, `tasks.py` prête pour Celery).
 
@@ -96,7 +100,8 @@ Documentation interactive : <http://127.0.0.1:8000/api/schema/swagger-ui/>
 | #8 | Payments : règlements, soldes clients, créances (debtors) | ✅ |
 | #9 | Passerelle Mobile Money (initiation + webhook signé) | ✅ |
 | #10 | Notifications SMS (signal PRET, relances 7 jours, Celery-ready) | ✅ |
-| #11-#12 | Delivery, Dashboard | ⏳ prochaine : #11 |
+| #11 | Delivery : coursiers (rôle dédié), assignation, my-deliveries | ✅ |
+| #12 | Dashboard gérant (agrégations, IsGerant) | ⏳ dernière |
 
 ## Variables d'environnement
 

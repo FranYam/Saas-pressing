@@ -15,14 +15,22 @@ class Commande(UUIDModel, TimeStampedModel):
     `ticket_number` est généré à la création par orders/services.py
     (Issue #7) — nullable tant que le générateur n'est pas branché.
 
-    Champs logistiques (adresse_collecte, statut_livraison, coursier) :
-    ajoutés à l'Issue #11.
+    Champs logistiques (Issue #11) : collecte/livraison à domicile.
+    `delivery_status` null = commande sans livraison (retrait au comptoir).
     """
 
     class Status(models.TextChoices):
         RECU = "RECU", "Reçu"
         EN_TRAITEMENT = "EN_TRAITEMENT", "En traitement"
         PRET = "PRET", "Prêt"
+        LIVRE = "LIVRE", "Livré"
+
+    class DeliveryStatus(models.TextChoices):
+        """Cycle logistique — transitions validées par orders/services."""
+
+        A_COLLECTER = "A_COLLECTER", "À collecter"
+        COLLECTE = "COLLECTE", "Collecté"
+        A_LIVRER = "A_LIVRER", "À livrer"
         LIVRE = "LIVRE", "Livré"
 
     class Canal(models.TextChoices):
@@ -69,6 +77,23 @@ class Commande(UUIDModel, TimeStampedModel):
     date_pret = models.DateTimeField("passé prêt le", null=True, blank=True)
     total_price = models.DecimalField(
         "montant total", max_digits=10, decimal_places=2, default=0
+    )
+    # --- Logistique (Issue #11) ---
+    collect_address = models.TextField("adresse de collecte", blank=True, default="")
+    delivery_status = models.CharField(
+        "statut de livraison",
+        max_length=15,
+        choices=DeliveryStatus.choices,
+        null=True,
+        blank=True,
+    )
+    assigned_courier = models.ForeignKey(
+        "deliveries.Courier",
+        verbose_name="coursier assigné",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,  # l'assignation reste traçable même si le profil disparaît
+        related_name="livraisons",
     )
 
     class Meta:

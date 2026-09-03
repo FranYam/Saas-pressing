@@ -76,6 +76,50 @@ def update_commande_status(*, commande: Commande, new_status: str) -> Commande:
 
 
 # ---------------------------------------------------------------------------
+# Livraison (Issue #11) — cycle A_COLLECTER → COLLECTE → A_LIVRER → LIVRE
+# ---------------------------------------------------------------------------
+
+ALLOWED_DELIVERY_TRANSITIONS: dict[str | None, set[str]] = {
+    None: {Commande.DeliveryStatus.A_COLLECTER, Commande.DeliveryStatus.COLLECTE},
+    Commande.DeliveryStatus.A_COLLECTER: {Commande.DeliveryStatus.COLLECTE},
+    Commande.DeliveryStatus.COLLECTE: {Commande.DeliveryStatus.A_LIVRER},
+    Commande.DeliveryStatus.A_LIVRER: {Commande.DeliveryStatus.LIVRE},
+    Commande.DeliveryStatus.LIVRE: set(),  # terminal
+}
+
+
+@transaction.atomic
+def assign_courier(*, commande: Commande, courier) -> Commande:
+    """Assigne un coursier à une commande (gérant)."""
+    if courier.pressing_id != commande.pressing_id:
+        raise BusinessRuleError("Ce coursier n'appartient pas à votre pressing.")
+    if not courier.is_active:
+        raise BusinessRuleError("Ce coursier est désactivé.")
+
+    commande.assigned_courier = courier
+    if commande.delivery_status is None and commande.collect_address:
+        commande.delivery_status = Commande.DeliveryStatus.A_COLLECTER
+    commande.save(update_fields=["assigned_courier", "delivery_status", "updated_at"])
+    return commande
+
+
+@transaction.atomic
+def update_delivery_status(*, commande: Commande, new_status: str) -> Commande:
+    """Fait progresser le statut de livraison en validant la transition."""
+    allowed = ALLOWED_DELIVERY_TRANSITIONS.get(commande.delivery_status, set())
+    if new_status not in allowed:
+        current = commande.get_delivery_status_display() or "sans livraison"
+        raise BusinessRuleError(
+            f"Transition de livraison interdite : {current} → {new_status}. "
+            "Cycle attendu : À collecter → Collecté → À livrer → Livré."
+        )
+
+    commande.delivery_status = new_status
+    commande.save(update_fields=["delivery_status", "updated_at"])
+    return commande
+
+
+# ---------------------------------------------------------------------------
 # Reçu client — texte brut prêt pour impression thermique 58/80mm ou SMS
 # ---------------------------------------------------------------------------
 

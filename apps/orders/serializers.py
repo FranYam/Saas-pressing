@@ -18,6 +18,7 @@ class OrderItemSerializer(serializers.ModelSerializer):
 class CommandeSerializer(serializers.ModelSerializer):
     articles = OrderItemSerializer(many=True)
     receipt = serializers.SerializerMethodField()
+    assigned_courier_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Commande
@@ -31,6 +32,10 @@ class CommandeSerializer(serializers.ModelSerializer):
             "date_depot",
             "date_retrait_prevue",
             "total_price",
+            "collect_address",
+            "delivery_status",
+            "assigned_courier",
+            "assigned_courier_name",
             "articles",
             "receipt",
             "created_at",
@@ -42,6 +47,8 @@ class CommandeSerializer(serializers.ModelSerializer):
             "payment_status",
             "date_depot",
             "total_price",
+            "assigned_courier",
+            "assigned_courier_name",
             "created_at",
         ]
 
@@ -49,12 +56,20 @@ class CommandeSerializer(serializers.ModelSerializer):
         """Reçu texte prêt pour impression thermique ou partage SMS/WhatsApp."""
         return format_receipt(obj)
 
+    def get_assigned_courier_name(self, obj) -> str | None:
+        return obj.assigned_courier.name if obj.assigned_courier else None
+
     def validate(self, attrs):
         articles = attrs.get("articles")
         if not articles:
             raise serializers.ValidationError(
                 {"articles": "Au moins un article est requis."}
             )
+
+        # Une commande avec collecte à domicile démarre le cycle logistique.
+        collect_address = attrs.get("collect_address", "")
+        if collect_address and not attrs.get("delivery_status"):
+            attrs["delivery_status"] = Commande.DeliveryStatus.A_COLLECTER
 
         # Isolation : impossible d'enregistrer une commande pour un client
         # d'un autre pressing.

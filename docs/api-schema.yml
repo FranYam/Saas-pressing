@@ -452,6 +452,109 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/deliveries/couriers/:
+    get:
+      operationId: v1_deliveries_couriers_list
+      description: |-
+        Coursiers du pressing : lecture pour tout le personnel, création et
+        désactivation réservées au gérant.
+
+        DELETE = désactivation (profil + compte de connexion), jamais de
+        suppression physique : l'historique des livraisons reste traçable.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCourierList'
+          description: ''
+    post:
+      operationId: v1_deliveries_couriers_create
+      description: |-
+        Coursiers du pressing : lecture pour tout le personnel, création et
+        désactivation réservées au gérant.
+
+        DELETE = désactivation (profil + compte de connexion), jamais de
+        suppression physique : l'historique des livraisons reste traçable.
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Courier'
+          description: ''
+  /api/v1/deliveries/couriers/{id}/:
+    get:
+      operationId: v1_deliveries_couriers_retrieve
+      description: |-
+        Coursiers du pressing : lecture pour tout le personnel, création et
+        désactivation réservées au gérant.
+
+        DELETE = désactivation (profil + compte de connexion), jamais de
+        suppression physique : l'historique des livraisons reste traçable.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) coursier.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Courier'
+          description: ''
+    delete:
+      operationId: v1_deliveries_couriers_destroy
+      description: |-
+        Coursiers du pressing : lecture pour tout le personnel, création et
+        désactivation réservées au gérant.
+
+        DELETE = désactivation (profil + compte de connexion), jamais de
+        suppression physique : l'historique des livraisons reste traçable.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) coursier.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
   /api/v1/orders/:
     get:
       operationId: v1_orders_list
@@ -562,6 +665,75 @@ paths:
               schema:
                 $ref: '#/components/schemas/Commande'
           description: ''
+  /api/v1/orders/{id}/assign-courier/:
+    patch:
+      operationId: v1_orders_assign_courier_partial_update
+      description: Assigne un coursier à la commande (gérant).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) commande.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+  /api/v1/orders/{id}/update-delivery/:
+    patch:
+      operationId: v1_orders_update_delivery_partial_update
+      description: 'Fait progresser le statut de livraison (réservé au coursier assigné
+        et au gérant). Cycle : À collecter → Collecté → À livrer → Livré.'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) commande.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
   /api/v1/orders/{id}/update_status/:
     patch:
       operationId: v1_orders_update_status_partial_update
@@ -588,6 +760,22 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/PatchedCommandeRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+  /api/v1/orders/my-deliveries/:
+    get:
+      operationId: v1_orders_my_deliveries_retrieve
+      description: 'Livraisons du coursier connecté : uniquement les commandes qui
+        lui sont assignées (Issue #11). Filtre optionnel ?delivery_status=.'
+      tags:
+      - v1
       security:
       - jwtAuth: []
       responses:
@@ -921,6 +1109,9 @@ paths:
           description: ''
 components:
   schemas:
+    BlankEnum:
+      enum:
+      - ''
     CanalEnum:
       enum:
       - COMPTOIR
@@ -1014,6 +1205,26 @@ components:
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
           readOnly: true
           title: Montant total
+        collect_address:
+          type: string
+          title: Adresse de collecte
+        delivery_status:
+          nullable: true
+          title: Statut de livraison
+          oneOf:
+          - $ref: '#/components/schemas/DeliveryStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        assigned_courier:
+          type: string
+          format: uuid
+          readOnly: true
+          nullable: true
+          title: Coursier assigné
+        assigned_courier_name:
+          type: string
+          nullable: true
+          readOnly: true
         articles:
           type: array
           items:
@@ -1028,6 +1239,8 @@ components:
           readOnly: true
       required:
       - articles
+      - assigned_courier
+      - assigned_courier_name
       - client
       - created_at
       - date_depot
@@ -1050,6 +1263,16 @@ components:
           type: string
           format: date-time
           title: Date de retrait prévue
+        collect_address:
+          type: string
+          title: Adresse de collecte
+        delivery_status:
+          nullable: true
+          title: Statut de livraison
+          oneOf:
+          - $ref: '#/components/schemas/DeliveryStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         articles:
           type: array
           items:
@@ -1069,6 +1292,48 @@ components:
         * `RECU` - Reçu
         * `EN_TRAITEMENT` - En traitement
         * `PRET` - Prêt
+        * `LIVRE` - Livré
+    Courier:
+      type: object
+      description: Représentation d'un coursier (lecture).
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          readOnly: true
+          title: Nom
+        phone_number:
+          type: string
+          readOnly: true
+          title: Téléphone
+        is_active:
+          type: boolean
+          readOnly: true
+          title: Actif
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - id
+      - is_active
+      - name
+      - phone_number
+    DeliveryStatusEnum:
+      enum:
+      - A_COLLECTER
+      - COLLECTE
+      - A_LIVRER
+      - LIVRE
+      type: string
+      description: |-
+        * `A_COLLECTER` - À collecter
+        * `COLLECTE` - Collecté
+        * `A_LIVRER` - À livrer
         * `LIVRE` - Livré
     EmployeeCreate:
       type: object
@@ -1335,6 +1600,9 @@ components:
         * `ESPECES` - Espèces
         * `MOBILE_MONEY` - Mobile Money
         * `CREDIT` - Crédit
+    NullEnum:
+      enum:
+      - null
     OperatorEnum:
       enum:
       - ORANGE
@@ -1431,6 +1699,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Commande'
+    PaginatedCourierList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Courier'
     PaginatedMobileMoneyRequestList:
       type: object
       required:
@@ -1581,6 +1872,16 @@ components:
           type: string
           format: date-time
           title: Date de retrait prévue
+        collect_address:
+          type: string
+          title: Adresse de collecte
+        delivery_status:
+          nullable: true
+          title: Statut de livraison
+          oneOf:
+          - $ref: '#/components/schemas/DeliveryStatusEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         articles:
           type: array
           items:
@@ -1783,10 +2084,12 @@ components:
       enum:
       - GERANT
       - EMPLOYE
+      - COURSIER
       type: string
       description: |-
         * `GERANT` - Gérant
         * `EMPLOYE` - Employé
+        * `COURSIER` - Coursier
     StatusFa8Enum:
       enum:
       - PAYE

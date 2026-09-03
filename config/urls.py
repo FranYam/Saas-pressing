@@ -21,6 +21,7 @@ api_v1 = [
     path("orders/", include("apps.orders.urls")),
     path("payments/", include("apps.payments.urls")),
     path("payments-gateway/", include("apps.payments_gateway.urls")),
+    path("deliveries/", include("apps.deliveries.urls")),
 ]
 
 urlpatterns = [
