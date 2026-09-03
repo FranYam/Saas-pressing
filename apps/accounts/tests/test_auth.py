@@ -37,7 +37,7 @@ class JWTAuthTests(TestCase):
     def test_login_wrong_password_denied(self):
         response = self.client.post(
             self.login_url,
-            {"username": "70123456", "password:" "mauvais-mot-de-passe"},
+            {"username": "70123456", "password": "mauvais-mot-de-passe"},
             format="json",
         )
 
