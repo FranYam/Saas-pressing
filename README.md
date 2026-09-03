@@ -67,6 +67,8 @@ docs/                 architecture, backlog, schéma OpenAPI
 | GET | `/api/v1/accounts/me/` | Authentifié | Profil de l'utilisateur connecté |
 | CRUD | `/api/v1/accounts/employees/` | Gérant | Équipe du pressing (DELETE = désactivation) |
 | CRUD | `/api/v1/clients/` | Authentifié | Répertoire clients du pressing (`?search=` par préfixe téléphone ou nom) |
+| GET/POST | `/api/v1/orders/` | Authentifié | Commandes + articles imbriqués (`?status=`, `?client=`, total calculé serveur) |
+| PATCH | `/api/v1/orders/{id}/update_status/` | Authentifié | Cycle `RECU→EN_TRAITEMENT→PRET→LIVRE` validé (reçu texte inclus) |
 
 Documentation interactive : <http://127.0.0.1:8000/api/schema/swagger-ui/>
 
@@ -80,7 +82,9 @@ Documentation interactive : <http://127.0.0.1:8000/api/schema/swagger-ui/>
 | #3 | Tenants : inscription + customisation visuelle | ✅ |
 | #4 | Accounts : JWT claims, /me/, gestion équipe (RBAC) | ✅ |
 | #5 | Clients : répertoire & recherche par téléphone | ✅ |
-| #6-#12 | Orders, Payments, Gateway, SMS, Delivery, Dashboard | ⏳ prochaine : #6 |
+| #6 | Orders : commande + articles, création transactionnelle | ✅ |
+| #7 | Orders : ticket unique TX-YYMM-NNN + cycle de vie validé | ✅ |
+| #8-#12 | Payments, Gateway, SMS, Delivery, Dashboard | ⏳ prochaine : #8 |
 
 ## Variables d'environnement
 

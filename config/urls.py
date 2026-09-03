@@ -18,8 +18,8 @@ api_v1 = [
     path("accounts/", include("apps.accounts.urls")),
     path("tenants/", include("apps.tenants.urls")),
     path("clients/", include("apps.clients.urls")),
+    path("orders/", include("apps.orders.urls")),
     # Apps montées au fil des issues du backlog :
-    # path("orders/", include("apps.orders.urls")),             # Issues #6-#7
     # path("payments/", include("apps.payments.urls")),         # Issue #8
     # path("payments-gateway/", include("apps.payments_gateway.urls")),  # Issue #9
 ]

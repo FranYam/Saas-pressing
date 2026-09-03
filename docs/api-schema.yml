@@ -452,6 +452,151 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/v1/orders/:
+    get:
+      operationId: v1_orders_list
+      description: Commandes du pressing connecté — tout le personnel authentifié.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCommandeList'
+          description: ''
+    post:
+      operationId: v1_orders_create
+      description: Commandes du pressing connecté — tout le personnel authentifié.
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommandeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CommandeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CommandeRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+  /api/v1/orders/{id}/:
+    get:
+      operationId: v1_orders_retrieve
+      description: Commandes du pressing connecté — tout le personnel authentifié.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) commande.
+        required: true
+      tags:
+      - v1
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+    patch:
+      operationId: v1_orders_partial_update
+      description: Commandes du pressing connecté — tout le personnel authentifié.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) commande.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+  /api/v1/orders/{id}/update_status/:
+    patch:
+      operationId: v1_orders_update_status_partial_update
+      description: 'Fait progresser le statut d''une commande. Transitions validées
+        : RECU → EN_TRAITEMENT → PRET → LIVRE (RECU → PRET toléré ; LIVRE exige PRET).'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) commande.
+        required: true
+      tags:
+      - v1
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCommandeRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
   /api/v1/tenants/profile/:
     get:
       operationId: v1_tenants_profile_retrieve
@@ -549,6 +694,14 @@ paths:
           description: ''
 components:
   schemas:
+    CanalEnum:
+      enum:
+      - COMPTOIR
+      - EN_LIGNE
+      type: string
+      description: |-
+        * `COMPTOIR` - Comptoir
+        * `EN_LIGNE` - En ligne
     Client:
       type: object
       properties:
@@ -592,6 +745,86 @@ components:
       required:
       - name
       - phone_number
+    Commande:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        ticket_number:
+          type: string
+          readOnly: true
+          nullable: true
+          title: N° ticket
+        client:
+          type: string
+          format: uuid
+        status:
+          allOf:
+          - $ref: '#/components/schemas/StatusEnum'
+          readOnly: true
+          title: Statut
+        canal:
+          $ref: '#/components/schemas/CanalEnum'
+        date_depot:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Date de dépôt
+        date_retrait_prevue:
+          type: string
+          format: date-time
+          title: Date de retrait prévue
+        total_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          readOnly: true
+          title: Montant total
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        receipt:
+          type: string
+          description: Reçu texte prêt pour impression thermique ou partage SMS/WhatsApp.
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - articles
+      - client
+      - created_at
+      - date_depot
+      - date_retrait_prevue
+      - id
+      - receipt
+      - status
+      - ticket_number
+      - total_price
+    CommandeRequest:
+      type: object
+      properties:
+        client:
+          type: string
+          format: uuid
+        canal:
+          $ref: '#/components/schemas/CanalEnum'
+        date_retrait_prevue:
+          type: string
+          format: date-time
+          title: Date de retrait prévue
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemRequest'
+      required:
+      - articles
+      - client
+      - date_retrait_prevue
     EmployeeCreate:
       type: object
       description: Création d'un employé par le gérant — rôle et pressing forcés côté
@@ -738,6 +971,48 @@ components:
       required:
       - password
       - username
+    OrderItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        clothing_type:
+          type: string
+          title: Type de vêtement
+          maxLength: 100
+        quantity:
+          type: integer
+          minimum: 1
+          default: 1
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - clothing_type
+      - id
+      - unit_price
+    OrderItemRequest:
+      type: object
+      properties:
+        clothing_type:
+          type: string
+          minLength: 1
+          title: Type de vêtement
+          maxLength: 100
+        quantity:
+          type: integer
+          minimum: 1
+          default: 1
+        unit_price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+      required:
+      - clothing_type
+      - unit_price
     PaginatedClientList:
       type: object
       required:
@@ -761,6 +1036,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Client'
+    PaginatedCommandeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Commande'
     PaginatedUserList:
       type: object
       required:
@@ -796,6 +1094,22 @@ components:
           type: string
           minLength: 1
           maxLength: 32
+    PatchedCommandeRequest:
+      type: object
+      properties:
+        client:
+          type: string
+          format: uuid
+        canal:
+          $ref: '#/components/schemas/CanalEnum'
+        date_retrait_prevue:
+          type: string
+          format: date-time
+          title: Date de retrait prévue
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItemRequest'
     PatchedEmployeeUpdateRequest:
       type: object
       description: 'Mise à jour d''un employé : infos, activation, réinitialisation
@@ -988,6 +1302,18 @@ components:
       description: |-
         * `GERANT` - Gérant
         * `EMPLOYE` - Employé
+    StatusEnum:
+      enum:
+      - RECU
+      - EN_TRAITEMENT
+      - PRET
+      - LIVRE
+      type: string
+      description: |-
+        * `RECU` - Reçu
+        * `EN_TRAITEMENT` - En traitement
+        * `PRET` - Prêt
+        * `LIVRE` - Livré
     TokenRefresh:
       type: object
       properties:
