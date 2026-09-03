@@ -1,0 +1,33 @@
+# CI — tests automatiques à chaque push / pull request.
+# Un déploiement ne doit jamais se faire sur du code non testé.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    env:
+      DJANGO_SETTINGS_MODULE: config.settings.dev
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+
+      - name: Installer les dépendances
+        run: pip install -r requirements/dev.txt
+
+      - name: Vérification système
+        run: python manage.py check
+
+      - name: Migrations à jour (aucune migration oubliée)
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Suite de tests
+        run: python manage.py test

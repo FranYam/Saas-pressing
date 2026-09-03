@@ -37,6 +37,15 @@ Documentation Swagger : <http://127.0.0.1:8000/api/schema/swagger-ui/>
 python manage.py test
 ```
 
+## Déploiement
+
+Guide complet (base **Neon** PostgreSQL + hébergement **Render** + médias
+**Cloudflare R2**, stratégie pilote 0 € → production) :
+[`docs/deploiement.md`](docs/deploiement.md).
+
+CI : les tests tournent automatiquement à chaque push
+([.github/workflows/ci.yml](.github/workflows/ci.yml)).
+
 ## Structure du projet
 
 ```

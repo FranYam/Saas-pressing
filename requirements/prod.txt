@@ -1,3 +1,6 @@
 -r base.txt
 gunicorn>=23.0
 sentry-sdk>=2.13
+# Stockage objet S3-compatible pour les médias (Cloudflare R2) — Issue médias persistants
+django-storages>=1.14
+boto3>=1.35

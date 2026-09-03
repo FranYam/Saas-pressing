@@ -33,6 +33,31 @@ STORAGES = {
 }
 
 # ---------------------------------------------------------------------------
+# Médias persistants (logos...) sur stockage objet S3-compatible — Cloudflare R2
+# (10 Go gratuits). Inactif tant que S3_BUCKET_NAME n'est pas défini : sans
+# disque persistant chez l'hébergeur, les uploads survivent aux redéploiements.
+# ---------------------------------------------------------------------------
+if env("S3_BUCKET_NAME", default=""):
+    STORAGES = {
+        **STORAGES,
+        "default": {
+            "BACKEND": "storages.backends.s3.S3Storage",
+            "OPTIONS": {
+                "endpoint_url": env("S3_ENDPOINT_URL"),
+                "access_key": env("S3_ACCESS_KEY_ID"),
+                "secret_key": env("S3_SECRET_ACCESS_KEY"),
+                "bucket_name": env("S3_BUCKET_NAME"),
+                # R2 : accès public via l'URL r2.dev du bucket (ou domaine propre).
+                "custom_domain": env("S3_CUSTOM_DOMAIN", default="") or None,
+                "region_name": env("S3_REGION_NAME", default="auto"),
+                "location": "media",
+                "url_protocol": "https:",
+                "file_overwrite": False,
+            },
+        },
+    }
+
+# ---------------------------------------------------------------------------
 # Sentry (optionnel — activé uniquement si SENTRY_DSN est défini)
 # ---------------------------------------------------------------------------
 SENTRY_DSN = env("SENTRY_DSN", default=None)
