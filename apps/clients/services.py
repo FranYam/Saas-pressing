@@ -25,3 +25,38 @@ def clean_phone(value: str) -> str:
             "Numéro invalide : 8 à 15 chiffres attendus (ex. 70123456)."
         )
     return digits
+
+
+# ---------------------------------------------------------------------------
+# Compte client (portail) — Issue : le client crée un compte et se connecte
+# ---------------------------------------------------------------------------
+
+import secrets
+
+from django.contrib.auth.hashers import check_password, make_password
+
+
+def set_client_password(client, raw_password: str) -> None:
+    """Hash et enregistre le mot de passe du compte client."""
+    client.password = make_password(raw_password)
+    client.save(update_fields=["password", "updated_at"])
+
+
+def verify_client_password(client, raw_password: str) -> bool:
+    """True si le client a un compte ET que le mot de passe correspond."""
+    if not client.password:
+        return False
+    return check_password(raw_password, client.password)
+
+
+def issue_portal_token(client) -> str:
+    """Génère (et stocke) un nouveau jeton de session portail — invalide l'ancien."""
+    client.portal_token = secrets.token_hex(32)
+    client.save(update_fields=["portal_token", "updated_at"])
+    return client.portal_token
+
+
+def clear_portal_token(client) -> None:
+    """Déconnexion portail : le jeton stocké ne vaut plus rien."""
+    client.portal_token = ""
+    client.save(update_fields=["portal_token", "updated_at"])

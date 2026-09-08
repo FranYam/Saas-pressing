@@ -17,6 +17,22 @@ class Client(UUIDModel, TimeStampedModel):
 
     name = models.CharField("nom", max_length=255)
     phone_number = models.CharField("téléphone", max_length=32)
+    # --- Compte client (portail) : vides = client sans compte (fiche comptoir) ---
+    password = models.CharField(
+        "mot de passe (hash)",
+        max_length=128,
+        blank=True,
+        default="",
+        help_text="Hash Django — vide tant que le client n'a pas créé son compte.",
+    )
+    portal_token = models.CharField(
+        "jeton portail",
+        max_length=64,
+        blank=True,
+        default="",
+        db_index=True,
+        help_text="Jeton d'accès au portail client, régénéré à chaque connexion.",
+    )
     pressing = models.ForeignKey(
         "tenants.Pressing",
         verbose_name="pressing",

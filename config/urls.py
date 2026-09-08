@@ -24,6 +24,7 @@ api_v1 = [
     path("deliveries/", include("apps.deliveries.urls")),
     path("dashboard/", include("apps.dashboard.urls")),
     path("portal/", include("apps.portal.urls")),
+    path("catalog/", include("apps.catalog.urls")),
 ]
 
 urlpatterns = [
