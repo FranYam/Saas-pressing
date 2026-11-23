@@ -131,6 +131,13 @@ REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "apps.core.pagination.StandardResultsSetPagination",
     "PAGE_SIZE": 20,
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.ScopedRateThrottle"],
+    "DEFAULT_THROTTLE_RATES": {
+        "portal_login": "5/minute",
+        "portal_register": "3/hour",
+        "portal_lookup": "10/minute",
+        "portal_collecte": "10/hour",
+    },
 }
 
 SIMPLE_JWT = {

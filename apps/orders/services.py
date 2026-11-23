@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from apps.core.exceptions import BusinessRuleError
 from apps.orders.models import Commande, OrderItem
+from apps.tenants.models import Pressing
 
 # ---------------------------------------------------------------------------
 # Tickets — format TX-YYMM-NNN, séquence remise à zéro chaque mois, par pressing
@@ -18,8 +19,8 @@ def generate_ticket_number(pressing, *, today=None) -> str:
     - Préfixe mensuel YYMM (réinitialisé chaque mois) ;
     - Séquence par pressing (unicité garantie par la contrainte
       unique_ticket_per_pressing) ;
-    - select_for_update verrouille les tickets du mois pour éviter deux
-      commandes simultanées avec le même numéro.
+    - le pressing est verrouillé pour sérialiser les créations simultanées,
+      y compris le premier ticket du mois.
 
     Limite MVP : 999 commandes/mois/pressing (tri lexicographique).
     """
@@ -27,6 +28,9 @@ def generate_ticket_number(pressing, *, today=None) -> str:
     prefix = f"TX-{today:%y%m}-"
 
     with transaction.atomic():
+        # Lock the stable tenant row, even when this is the first ticket of
+        # the month and there is no existing ticket row to lock.
+        Pressing.objects.select_for_update().get(pk=pressing.pk)
         last = (
             Commande.objects.select_for_update()
             .filter(pressing=pressing, ticket_number__startswith=prefix)
@@ -166,6 +170,9 @@ def create_commande(
     - Si un article échoue à l'insertion, la commande créée juste avant est
       annulée par le rollback (critère d'acceptation Issue #6).
     """
+    if client.pressing_id != pressing.pk:
+        raise BusinessRuleError("Client is not part of this pressing.")
+
     total = sum(
         (Decimal(article["quantity"]) * article["unit_price"] for article in articles),
         Decimal("0.00"),

@@ -67,5 +67,5 @@ if SENTRY_DSN:
     sentry_sdk.init(
         dsn=SENTRY_DSN,
         send_default_pii=False,
-        traces_sample_rate=1.0,
+        traces_sample_rate=env.float("SENTRY_TRACES_SAMPLE_RATE", default=0.1),
     )

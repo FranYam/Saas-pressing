@@ -115,6 +115,18 @@ Documentation interactive : <http://127.0.0.1:8000/api/schema/swagger-ui/>
 
 **🎉 Backlog complet : 12/12 issues livrées — 171 tests verts.**
 
+## Portail client public
+
+Le portail propose l'inscription et la connexion client, un catalogue tarifaire,
+les demandes de collecte, ainsi qu'une consultation par ticket et numéro de
+téléphone complet. Les routes publiques de connexion, inscription, collecte et
+consultation sont limitées par des scopes DRF configurés dans
+`REST_FRAMEWORK`.
+
+En déploiement multi-instance, configurez un cache partagé pour que les limites
+de requêtes soient communes à toutes les instances. Le lookup par ticket ne
+retourne des commandes que si le numéro complet correspond.
+
 ## Variables d'environnement
 
 Voir [`.env.example`](.env.example). En production, `DJANGO_SECRET_KEY`,

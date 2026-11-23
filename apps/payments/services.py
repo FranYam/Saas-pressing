@@ -36,6 +36,9 @@ def register_paiement(*, commande: Commande, amount: Decimal, mode: str, date_pa
       payer (pas de surpaiement) ;
     - statut PAYE interdit tout nouveau règlement.
     """
+    # Serialize writes per order so concurrent requests cannot spend the same
+    # outstanding balance. Use the locked instance for all calculations.
+    commande = Commande.objects.select_for_update().get(pk=commande.pk)
     if commande.payment_status == Commande.PaymentStatus.PAYE:
         raise BusinessRuleError("Cette commande est déjà entièrement payée.")
 

@@ -162,7 +162,7 @@ def process_webhook(*, operator: str, payload: dict) -> tuple[int, dict]:
         query |= MobileMoneyRequest.objects.filter(id=UUID(reference))
     except (ValueError, AttributeError):
         pass
-    mm_request = query.first()
+    mm_request = query.select_for_update().first()
     if mm_request is None:
         return 404, {"detail": "Demande Mobile Money introuvable."}
 

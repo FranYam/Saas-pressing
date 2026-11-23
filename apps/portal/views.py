@@ -9,16 +9,13 @@ Deux modes d'accès cohabitent :
 Le jeton de session (`X-Portal-Token`) est régénéré à chaque connexion et
 révoqué à la déconnexion — il vaut pour un seul client, tous pressings.
 """
-from datetime import timedelta
-from decimal import Decimal, InvalidOperation
-
 from django.contrib.auth.hashers import make_password
 from django.db.models import Sum
-from django.utils import timezone
 from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.throttling import ScopedRateThrottle
 from rest_framework.views import APIView
 
 from apps.catalog.models import Tarif
@@ -30,7 +27,8 @@ from apps.clients.services import (
 )
 from apps.orders.models import Commande
 from apps.orders.serializers import CommandeSerializer
-from apps.orders.services import create_commande
+from apps.portal.serializers import ClientRegisterInputSerializer, CollectionInputSerializer
+from apps.portal.services import create_collection_order
 from apps.tenants.models import Pressing
 
 
@@ -105,25 +103,16 @@ class ClientRegisterView(APIView):
 
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "portal_register"
 
     def post(self, request):
-        pressing_id = request.data.get("pressing")
-        name = (request.data.get("name") or "").strip()
-        password = (request.data.get("password") or "")
-        try:
-            phone = clean_phone(request.data.get("phone") or "")
-        except Exception:
-            return Response({"detail": "Numéro de téléphone invalide."}, status=400)
-
-        if not name or len(password) < 6:
-            return Response(
-                {"detail": "Nom et mot de passe (6 caractères min.) sont requis."},
-                status=400,
-            )
-        try:
-            pressing = Pressing.objects.get(pk=pressing_id)
-        except Pressing.DoesNotExist:
-            return Response({"detail": "Pressing introuvable."}, status=400)
+        serializer = ClientRegisterInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        pressing = serializer.validated_data["pressing"]
+        name = serializer.validated_data["name"]
+        phone = serializer.validated_data["phone"]
+        password = serializer.validated_data["password"]
 
         client = Client.objects.filter(phone_number=phone, pressing=pressing).first()
         if client:
@@ -147,6 +136,8 @@ class ClientLoginView(APIView):
 
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "portal_login"
 
     def post(self, request):
         phone = request.data.get("phone") or ""
@@ -223,62 +214,17 @@ class PortalCollecteView(APIView):
 
     permission_classes = [AllowAny]
     authentication_classes = []
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "portal_collecte"
 
     def post(self, request):
         client = client_from_token(request)
         if not client:
             return Response({"detail": "Session expirée — reconnectez-vous."}, status=401)
 
-        address = (request.data.get("collect_address") or "").strip()
-        slot = (request.data.get("creneau") or "").strip()
-        notes = (request.data.get("notes") or "").strip()
-        items = request.data.get("articles") or []
-        if not address:
-            return Response({"detail": "L'adresse de collecte est requise."}, status=400)
-        if not items:
-            return Response({"detail": "Sélectionnez au moins un article."}, status=400)
-
-        # Chiffrement serveur depuis le catalogue du pressing.
-        tarifs = {t.name: t for t in Tarif.objects.filter(pressing=client.pressing, is_active=True)}
-        articles = []
-        for item in items:
-            tarif = tarifs.get((item.get("clothing_type") or "").strip())
-            if not tarif:
-                return Response(
-                    {"detail": f"« {item.get('clothing_type')} » n'est pas au catalogue."},
-                    status=400,
-                )
-            try:
-                quantity = int(item.get("quantity"))
-            except (TypeError, ValueError):
-                quantity = 0
-            if not 1 <= quantity <= 50:
-                return Response(
-                    {"detail": f"Quantité invalide pour « {tarif.name} » (1 à 50)."},
-                    status=400,
-                )
-            articles.append(
-                {"clothing_type": tarif.name, "quantity": quantity, "unit_price": tarif.price}
-            )
-
-        commande = create_commande(
-            pressing=client.pressing,
-            client=client,
-            articles=articles,
-            date_retrait_prevue=timezone.now() + timedelta(days=3),
-            canal=Commande.Canal.EN_LIGNE,
-        )
-        # Cycle logistique : la marchandise est à aller chercher chez le client.
-        commande.delivery_status = Commande.DeliveryStatus.A_COLLECTER
-        # Le créneau et les notes n'ont pas de champ dédié : concaténés à
-        # l'adresse, visibles par le coursier et le comptoir.
-        parts = [address]
-        if slot:
-            parts.append(f"Créneau : {slot}")
-        if notes:
-            parts.append(f"Note : {notes}")
-        commande.collect_address = " — ".join(parts)
-        commande.save(update_fields=["delivery_status", "collect_address", "updated_at"])
+        serializer = CollectionInputSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        commande = create_collection_order(client=client, **serializer.validated_data)
 
         data = CommandeSerializer(commande).data
         return Response(data, status=201)
@@ -299,6 +245,8 @@ class ClientPortalView(APIView):
 
     permission_classes = [AllowAny]
     authentication_classes = []  # publique : aucun header Authorization requis
+    throttle_classes = [ScopedRateThrottle]
+    throttle_scope = "portal_lookup"
 
     @extend_schema(
         operation_id="portal_orders",
@@ -325,9 +273,7 @@ class ClientPortalView(APIView):
         )
         # Comparaison sur les 8 derniers chiffres : la base peut contenir le
         # numéro au format local (70123456) ou E.164 (22670123456).
-        if commande is None or _last_8_digits(
-            commande.client.phone_number
-        ) != _last_8_digits(phone):
+        if commande is None or clean_phone(commande.client.phone_number) != clean_phone(phone):
             return Response(
                 {"detail": "Ticket introuvable. Vérifiez le numéro de ticket et le téléphone."},
                 status=status.HTTP_404_NOT_FOUND,
