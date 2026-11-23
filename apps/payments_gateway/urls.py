@@ -1,4 +1,4 @@
-"""Routes payments_gateway — montées sous /api/v1/payments-gateway/."""
+"""Routes payments_gateway — montées sous /api/payments-gateway/."""
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 

@@ -1,4 +1,4 @@
-"""Routes dashboard — montées sous /api/v1/dashboard/."""
+"""Routes dashboard — montées sous /api/dashboard/."""
 from django.urls import path
 
 from apps.dashboard.views import DashboardSummaryView

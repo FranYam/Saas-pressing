@@ -1,6 +1,6 @@
 """Routes principales de l'API.
 
-Chaque app métier porte son propre `urls.py`, monté ici sous /api/v1/<app>/.
+Chaque app métier porte son propre `urls.py`, monté ici sous /api/<app>/.
 Documentation OpenAPI servie par drf-spectacular (Issue #1).
 """
 from django.conf import settings
@@ -14,7 +14,7 @@ from drf_spectacular.views import (
 )
 from rest_framework.permissions import AllowAny
 
-api_v1 = [
+api_urlpatterns = [
     path("accounts/", include("apps.accounts.urls")),
     path("tenants/", include("apps.tenants.urls")),
     path("clients/", include("apps.clients.urls")),
@@ -45,7 +45,7 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-    path("api/v1/", include(api_v1)),
+    path("api/", include(api_urlpatterns)),
 ]
 
 if settings.DEBUG:

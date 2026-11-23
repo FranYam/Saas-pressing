@@ -33,7 +33,7 @@ def make_commande(pressing, client, **kwargs):
 
 
 class CourierManagementTests(TestCase):
-    """CRUD /api/v1/deliveries/couriers/ — gérant."""
+    """CRUD /api/deliveries/couriers/ — gérant."""
 
     def setUp(self):
         self.client = APIClient()
@@ -131,7 +131,7 @@ class CourierManagementTests(TestCase):
 
 
 class DeliveryAssignmentTests(TestCase):
-    """PATCH /api/v1/orders/{id}/assign-courier/ — gérant."""
+    """PATCH /api/orders/{id}/assign-courier/ — gérant."""
 
     def setUp(self):
         self.client = APIClient()
@@ -185,7 +185,7 @@ class DeliveryAssignmentTests(TestCase):
 
 
 class MyDeliveriesTests(TestCase):
-    """GET /api/v1/orders/my-deliveries/ — le coursier ne voit QUE ses livraisons."""
+    """GET /api/orders/my-deliveries/ — le coursier ne voit QUE ses livraisons."""
 
     def setUp(self):
         self.client = APIClient()

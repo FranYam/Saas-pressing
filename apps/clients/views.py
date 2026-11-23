@@ -1,6 +1,6 @@
 """Vues clients : répertoire du pressing + recherche rapide par téléphone.
 
-GET /api/v1/clients/?search=7012  → recherche par préfixe de numéro
+GET /api/clients/?search=7012  → recherche par préfixe de numéro
 (normalisé : « 70 12 » fonctionne aussi) ou par nom. Le ViewSet hérite de
 TenantScopedQuerysetMixin : le pressing A ne voit ni ne trouve jamais les
 clients du pressing B.

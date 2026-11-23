@@ -27,7 +27,7 @@ def verify_signature(secret: str, raw_body: bytes, signature: str) -> bool:
 
 
 class OperatorWebhookView(APIView):
-    """POST /api/v1/payments-gateway/webhook/<operator>/ — public, signé."""
+    """POST /api/payments-gateway/webhook/<operator>/ — public, signé."""
 
     permission_classes = [AllowAny]
     authentication_classes = []  # webhook : aucun mécanisme d'auth utilisateur

@@ -5,9 +5,9 @@ info:
   description: API multi-tenant de gestion de pressings (commandes, paiements, notifications
     SMS, livraison) pour le marché du Burkina Faso.
 paths:
-  /api/v1/accounts/employees/:
+  /api/accounts/employees/:
     get:
-      operationId: v1_accounts_employees_list
+      operationId: accounts_employees_list
       description: |-
         Gestion de l'équipe du pressing connecté — réservée au gérant.
 
@@ -29,7 +29,7 @@ paths:
         schema:
           type: integer
       tags:
-      - v1
+      - accounts
       security:
       - jwtAuth: []
       responses:
@@ -40,7 +40,7 @@ paths:
                 $ref: '#/components/schemas/PaginatedUserList'
           description: ''
     post:
-      operationId: v1_accounts_employees_create
+      operationId: accounts_employees_create
       description: |-
         Gestion de l'équipe du pressing connecté — réservée au gérant.
 
@@ -49,7 +49,7 @@ paths:
         - Delete : désactivation (is_active=False), jamais de suppression physique —
           l'historique des commandes rattachées doit rester traçable.
       tags:
-      - v1
+      - accounts
       requestBody:
         content:
           application/json:
@@ -71,9 +71,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/EmployeeCreate'
           description: ''
-  /api/v1/accounts/employees/{id}/:
+  /api/accounts/employees/{id}/:
     get:
-      operationId: v1_accounts_employees_retrieve
+      operationId: accounts_employees_retrieve
       description: |-
         Gestion de l'équipe du pressing connecté — réservée au gérant.
 
@@ -90,7 +90,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) utilisateur.
         required: true
       tags:
-      - v1
+      - accounts
       security:
       - jwtAuth: []
       responses:
@@ -101,7 +101,7 @@ paths:
                 $ref: '#/components/schemas/User'
           description: ''
     put:
-      operationId: v1_accounts_employees_update
+      operationId: accounts_employees_update
       description: |-
         Gestion de l'équipe du pressing connecté — réservée au gérant.
 
@@ -118,7 +118,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) utilisateur.
         required: true
       tags:
-      - v1
+      - accounts
       requestBody:
         content:
           application/json:
@@ -140,7 +140,7 @@ paths:
                 $ref: '#/components/schemas/EmployeeUpdate'
           description: ''
     patch:
-      operationId: v1_accounts_employees_partial_update
+      operationId: accounts_employees_partial_update
       description: |-
         Gestion de l'équipe du pressing connecté — réservée au gérant.
 
@@ -157,7 +157,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) utilisateur.
         required: true
       tags:
-      - v1
+      - accounts
       requestBody:
         content:
           application/json:
@@ -179,7 +179,7 @@ paths:
                 $ref: '#/components/schemas/EmployeeUpdate'
           description: ''
     delete:
-      operationId: v1_accounts_employees_destroy
+      operationId: accounts_employees_destroy
       description: |-
         Gestion de l'équipe du pressing connecté — réservée au gérant.
 
@@ -196,19 +196,19 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) utilisateur.
         required: true
       tags:
-      - v1
+      - accounts
       security:
       - jwtAuth: []
       responses:
         '204':
           description: No response body
-  /api/v1/accounts/login/:
+  /api/accounts/login/:
     post:
-      operationId: v1_accounts_login_create
-      description: POST /api/v1/accounts/login/ — paire de tokens JWT avec claims
-        role + pressing_id.
+      operationId: accounts_login_create
+      description: POST /api/accounts/login/ — paire de tokens JWT avec claims role
+        + pressing_id.
       tags:
-      - v1
+      - accounts
       requestBody:
         content:
           application/json:
@@ -224,14 +224,14 @@ paths:
       responses:
         '200':
           description: No response body
-  /api/v1/accounts/login/refresh/:
+  /api/accounts/login/refresh/:
     post:
-      operationId: v1_accounts_login_refresh_create
+      operationId: accounts_login_refresh_create
       description: |-
         Takes a refresh type JSON web token and returns an access type JSON web
         token if the refresh token is valid.
       tags:
-      - v1
+      - accounts
       requestBody:
         content:
           application/json:
@@ -251,14 +251,14 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenRefresh'
           description: ''
-  /api/v1/accounts/login/verify/:
+  /api/accounts/login/verify/:
     post:
-      operationId: v1_accounts_login_verify_create
+      operationId: accounts_login_verify_create
       description: |-
         Takes a token and indicates if it is valid.  This view provides no
         information about a token's fitness for a particular use.
       tags:
-      - v1
+      - accounts
       requestBody:
         content:
           application/json:
@@ -274,13 +274,13 @@ paths:
       responses:
         '200':
           description: No response body
-  /api/v1/accounts/me/:
+  /api/accounts/me/:
     get:
-      operationId: v1_accounts_me_retrieve
-      description: GET /api/v1/accounts/me/ — profil de l'utilisateur connecté (tous
+      operationId: accounts_me_retrieve
+      description: GET /api/accounts/me/ — profil de l'utilisateur connecté (tous
         rôles).
       tags:
-      - v1
+      - accounts
       security:
       - jwtAuth: []
       responses:
@@ -290,9 +290,226 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: ''
-  /api/v1/clients/:
+  /api/catalog/:
     get:
-      operationId: v1_clients_list
+      operationId: catalog_list
+      description: |-
+        Gestion du catalogue par le pressing (Paramètres → Tarification).
+
+        `PUT /catalog/bulk/` remplace tout le catalogue en une fois : la page
+        Tarification envoie l'état complet, les lignes absentes sont supprimées.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: Un numéro de page de l'ensemble des résultats.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Nombre de résultats à retourner par page.
+        schema:
+          type: integer
+      tags:
+      - catalog
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedTarifList'
+          description: ''
+    post:
+      operationId: catalog_create
+      description: |-
+        Gestion du catalogue par le pressing (Paramètres → Tarification).
+
+        `PUT /catalog/bulk/` remplace tout le catalogue en une fois : la page
+        Tarification envoie l'état complet, les lignes absentes sont supprimées.
+      tags:
+      - catalog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TarifRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TarifRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TarifRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarif'
+          description: ''
+  /api/catalog/{id}/:
+    get:
+      operationId: catalog_retrieve
+      description: |-
+        Gestion du catalogue par le pressing (Paramètres → Tarification).
+
+        `PUT /catalog/bulk/` remplace tout le catalogue en une fois : la page
+        Tarification envoie l'état complet, les lignes absentes sont supprimées.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) tarif.
+        required: true
+      tags:
+      - catalog
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarif'
+          description: ''
+    put:
+      operationId: catalog_update
+      description: |-
+        Gestion du catalogue par le pressing (Paramètres → Tarification).
+
+        `PUT /catalog/bulk/` remplace tout le catalogue en une fois : la page
+        Tarification envoie l'état complet, les lignes absentes sont supprimées.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) tarif.
+        required: true
+      tags:
+      - catalog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TarifRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TarifRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TarifRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarif'
+          description: ''
+    patch:
+      operationId: catalog_partial_update
+      description: |-
+        Gestion du catalogue par le pressing (Paramètres → Tarification).
+
+        `PUT /catalog/bulk/` remplace tout le catalogue en une fois : la page
+        Tarification envoie l'état complet, les lignes absentes sont supprimées.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) tarif.
+        required: true
+      tags:
+      - catalog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedTarifRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedTarifRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedTarifRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarif'
+          description: ''
+    delete:
+      operationId: catalog_destroy
+      description: |-
+        Gestion du catalogue par le pressing (Paramètres → Tarification).
+
+        `PUT /catalog/bulk/` remplace tout le catalogue en une fois : la page
+        Tarification envoie l'état complet, les lignes absentes sont supprimées.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+        description: Un(une) Chaîne UUID identifiant ce(cette) tarif.
+        required: true
+      tags:
+      - catalog
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/catalog/bulk/:
+    put:
+      operationId: catalog_bulk_update
+      description: |-
+        Gestion du catalogue par le pressing (Paramètres → Tarification).
+
+        `PUT /catalog/bulk/` remplace tout le catalogue en une fois : la page
+        Tarification envoie l'état complet, les lignes absentes sont supprimées.
+      tags:
+      - catalog
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TarifRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TarifRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TarifRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tarif'
+          description: ''
+  /api/clients/:
+    get:
+      operationId: clients_list
       description: CRUD clients — accessible à tout le personnel authentifié du pressing.
       parameters:
       - name: page
@@ -308,7 +525,7 @@ paths:
         schema:
           type: integer
       tags:
-      - v1
+      - clients
       security:
       - jwtAuth: []
       responses:
@@ -319,10 +536,10 @@ paths:
                 $ref: '#/components/schemas/PaginatedClientList'
           description: ''
     post:
-      operationId: v1_clients_create
+      operationId: clients_create
       description: CRUD clients — accessible à tout le personnel authentifié du pressing.
       tags:
-      - v1
+      - clients
       requestBody:
         content:
           application/json:
@@ -344,9 +561,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Client'
           description: ''
-  /api/v1/clients/{id}/:
+  /api/clients/{id}/:
     get:
-      operationId: v1_clients_retrieve
+      operationId: clients_retrieve
       description: CRUD clients — accessible à tout le personnel authentifié du pressing.
       parameters:
       - in: path
@@ -357,7 +574,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) client.
         required: true
       tags:
-      - v1
+      - clients
       security:
       - jwtAuth: []
       responses:
@@ -368,7 +585,7 @@ paths:
                 $ref: '#/components/schemas/Client'
           description: ''
     put:
-      operationId: v1_clients_update
+      operationId: clients_update
       description: CRUD clients — accessible à tout le personnel authentifié du pressing.
       parameters:
       - in: path
@@ -379,7 +596,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) client.
         required: true
       tags:
-      - v1
+      - clients
       requestBody:
         content:
           application/json:
@@ -402,7 +619,7 @@ paths:
                 $ref: '#/components/schemas/Client'
           description: ''
     patch:
-      operationId: v1_clients_partial_update
+      operationId: clients_partial_update
       description: CRUD clients — accessible à tout le personnel authentifié du pressing.
       parameters:
       - in: path
@@ -413,7 +630,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) client.
         required: true
       tags:
-      - v1
+      - clients
       requestBody:
         content:
           application/json:
@@ -435,7 +652,7 @@ paths:
                 $ref: '#/components/schemas/Client'
           description: ''
     delete:
-      operationId: v1_clients_destroy
+      operationId: clients_destroy
       description: CRUD clients — accessible à tout le personnel authentifié du pressing.
       parameters:
       - in: path
@@ -446,20 +663,20 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) client.
         required: true
       tags:
-      - v1
+      - clients
       security:
       - jwtAuth: []
       responses:
         '204':
           description: No response body
-  /api/v1/dashboard/summary/:
+  /api/dashboard/summary/:
     get:
-      operationId: v1_dashboard_summary_retrieve
+      operationId: dashboard_summary_retrieve
       description: 'Agrégats du jour : chiffre d''affaires (jour/mois) consolidé depuis
         tous les paiements, commandes en cours, encours des créances, nombre de clients
         débiteurs et linges prêts non réclamés (> 7 jours).'
       tags:
-      - v1
+      - dashboard
       security:
       - jwtAuth: []
       responses:
@@ -469,9 +686,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/DashboardSummary'
           description: ''
-  /api/v1/deliveries/couriers/:
+  /api/deliveries/couriers/:
     get:
-      operationId: v1_deliveries_couriers_list
+      operationId: deliveries_couriers_list
       description: |-
         Coursiers du pressing : lecture pour tout le personnel, création et
         désactivation réservées au gérant.
@@ -492,7 +709,7 @@ paths:
         schema:
           type: integer
       tags:
-      - v1
+      - deliveries
       security:
       - jwtAuth: []
       responses:
@@ -503,7 +720,7 @@ paths:
                 $ref: '#/components/schemas/PaginatedCourierList'
           description: ''
     post:
-      operationId: v1_deliveries_couriers_create
+      operationId: deliveries_couriers_create
       description: |-
         Coursiers du pressing : lecture pour tout le personnel, création et
         désactivation réservées au gérant.
@@ -511,7 +728,7 @@ paths:
         DELETE = désactivation (profil + compte de connexion), jamais de
         suppression physique : l'historique des livraisons reste traçable.
       tags:
-      - v1
+      - deliveries
       security:
       - jwtAuth: []
       responses:
@@ -521,9 +738,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Courier'
           description: ''
-  /api/v1/deliveries/couriers/{id}/:
+  /api/deliveries/couriers/{id}/:
     get:
-      operationId: v1_deliveries_couriers_retrieve
+      operationId: deliveries_couriers_retrieve
       description: |-
         Coursiers du pressing : lecture pour tout le personnel, création et
         désactivation réservées au gérant.
@@ -539,7 +756,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) coursier.
         required: true
       tags:
-      - v1
+      - deliveries
       security:
       - jwtAuth: []
       responses:
@@ -550,7 +767,7 @@ paths:
                 $ref: '#/components/schemas/Courier'
           description: ''
     delete:
-      operationId: v1_deliveries_couriers_destroy
+      operationId: deliveries_couriers_destroy
       description: |-
         Coursiers du pressing : lecture pour tout le personnel, création et
         désactivation réservées au gérant.
@@ -566,15 +783,15 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) coursier.
         required: true
       tags:
-      - v1
+      - deliveries
       security:
       - jwtAuth: []
       responses:
         '204':
           description: No response body
-  /api/v1/orders/:
+  /api/orders/:
     get:
-      operationId: v1_orders_list
+      operationId: orders_list
       description: Commandes du pressing connecté — tout le personnel authentifié.
       parameters:
       - name: page
@@ -590,7 +807,7 @@ paths:
         schema:
           type: integer
       tags:
-      - v1
+      - orders
       security:
       - jwtAuth: []
       responses:
@@ -601,10 +818,10 @@ paths:
                 $ref: '#/components/schemas/PaginatedCommandeList'
           description: ''
     post:
-      operationId: v1_orders_create
+      operationId: orders_create
       description: Commandes du pressing connecté — tout le personnel authentifié.
       tags:
-      - v1
+      - orders
       requestBody:
         content:
           application/json:
@@ -626,9 +843,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Commande'
           description: ''
-  /api/v1/orders/{id}/:
+  /api/orders/{id}/:
     get:
-      operationId: v1_orders_retrieve
+      operationId: orders_retrieve
       description: Commandes du pressing connecté — tout le personnel authentifié.
       parameters:
       - in: path
@@ -639,7 +856,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) commande.
         required: true
       tags:
-      - v1
+      - orders
       security:
       - jwtAuth: []
       responses:
@@ -650,7 +867,7 @@ paths:
                 $ref: '#/components/schemas/Commande'
           description: ''
     patch:
-      operationId: v1_orders_partial_update
+      operationId: orders_partial_update
       description: Commandes du pressing connecté — tout le personnel authentifié.
       parameters:
       - in: path
@@ -661,7 +878,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) commande.
         required: true
       tags:
-      - v1
+      - orders
       requestBody:
         content:
           application/json:
@@ -682,9 +899,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Commande'
           description: ''
-  /api/v1/orders/{id}/assign-courier/:
+  /api/orders/{id}/assign-courier/:
     patch:
-      operationId: v1_orders_assign_courier_partial_update
+      operationId: orders_assign_courier_partial_update
       description: Assigne un coursier à la commande (gérant).
       parameters:
       - in: path
@@ -695,7 +912,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) commande.
         required: true
       tags:
-      - v1
+      - orders
       requestBody:
         content:
           application/json:
@@ -716,9 +933,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Commande'
           description: ''
-  /api/v1/orders/{id}/update-delivery/:
+  /api/orders/{id}/update-delivery/:
     patch:
-      operationId: v1_orders_update_delivery_partial_update
+      operationId: orders_update_delivery_partial_update
       description: 'Fait progresser le statut de livraison (réservé au coursier assigné
         et au gérant). Cycle : À collecter → Collecté → À livrer → Livré.'
       parameters:
@@ -730,7 +947,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) commande.
         required: true
       tags:
-      - v1
+      - orders
       requestBody:
         content:
           application/json:
@@ -751,9 +968,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Commande'
           description: ''
-  /api/v1/orders/{id}/update_status/:
+  /api/orders/{id}/update_status/:
     patch:
-      operationId: v1_orders_update_status_partial_update
+      operationId: orders_update_status_partial_update
       description: 'Fait progresser le statut d''une commande. Transitions validées
         : RECU → EN_TRAITEMENT → PRET → LIVRE (RECU → PRET toléré ; LIVRE exige PRET).'
       parameters:
@@ -765,7 +982,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) commande.
         required: true
       tags:
-      - v1
+      - orders
       requestBody:
         content:
           application/json:
@@ -786,13 +1003,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Commande'
           description: ''
-  /api/v1/orders/my-deliveries/:
+  /api/orders/my-deliveries/:
     get:
-      operationId: v1_orders_my_deliveries_retrieve
+      operationId: orders_my_deliveries_retrieve
       description: 'Livraisons du coursier connecté : uniquement les commandes qui
         lui sont assignées (Issue #11). Filtre optionnel ?delivery_status=.'
       tags:
-      - v1
+      - orders
       security:
       - jwtAuth: []
       responses:
@@ -802,9 +1019,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/Commande'
           description: ''
-  /api/v1/payments/:
+  /api/payments/:
     get:
-      operationId: v1_payments_list
+      operationId: payments_list
       description: Règlements du pressing connecté — tout le personnel authentifié.
       parameters:
       - name: page
@@ -820,7 +1037,7 @@ paths:
         schema:
           type: integer
       tags:
-      - v1
+      - payments
       security:
       - jwtAuth: []
       responses:
@@ -831,10 +1048,10 @@ paths:
                 $ref: '#/components/schemas/PaginatedPaiementList'
           description: ''
     post:
-      operationId: v1_payments_create
+      operationId: payments_create
       description: Règlements du pressing connecté — tout le personnel authentifié.
       tags:
-      - v1
+      - payments
       requestBody:
         content:
           application/json:
@@ -856,13 +1073,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Paiement'
           description: ''
-  /api/v1/payments-gateway/initiate/:
+  /api/payments-gateway/initiate/:
     post:
-      operationId: v1_payments_gateway_initiate_create
+      operationId: payments_gateway_initiate_create
       description: Déclenche un push Mobile Money (Orange/Moov) pour le reste à payer
         de la commande. Le montant est calculé serveur.
       tags:
-      - v1
+      - payments-gateway
       requestBody:
         content:
           application/json:
@@ -888,9 +1105,9 @@ paths:
           description: No response body
         '404':
           description: No response body
-  /api/v1/payments-gateway/requests/:
+  /api/payments-gateway/requests/:
     get:
-      operationId: v1_payments_gateway_requests_list
+      operationId: payments_gateway_requests_list
       description: Suivi des demandes Mobile Money du pressing connecté (lecture seule).
       parameters:
       - name: page
@@ -906,7 +1123,7 @@ paths:
         schema:
           type: integer
       tags:
-      - v1
+      - payments-gateway
       security:
       - jwtAuth: []
       responses:
@@ -916,9 +1133,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/PaginatedMobileMoneyRequestList'
           description: ''
-  /api/v1/payments-gateway/requests/{id}/:
+  /api/payments-gateway/requests/{id}/:
     get:
-      operationId: v1_payments_gateway_requests_retrieve
+      operationId: payments_gateway_requests_retrieve
       description: Suivi des demandes Mobile Money du pressing connecté (lecture seule).
       parameters:
       - in: path
@@ -929,7 +1146,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) demande Mobile Money.
         required: true
       tags:
-      - v1
+      - payments-gateway
       security:
       - jwtAuth: []
       responses:
@@ -939,9 +1156,9 @@ paths:
               schema:
                 $ref: '#/components/schemas/MobileMoneyRequest'
           description: ''
-  /api/v1/payments-gateway/webhook/{operator}/:
+  /api/payments-gateway/webhook/{operator}/:
     post:
-      operationId: v1_payments_gateway_webhook_create
+      operationId: payments_gateway_webhook_create
       description: 'Callback opérateur : corps signé HMAC-SHA256 (en-tête X-Signature,
         secret partagé par opérateur). Idempotent — un webhook rejoué ne crée pas
         de double paiement.'
@@ -952,7 +1169,7 @@ paths:
           type: string
         required: true
       tags:
-      - v1
+      - payments-gateway
       requestBody:
         content:
           application/json:
@@ -976,9 +1193,9 @@ paths:
           description: No response body
         '404':
           description: No response body
-  /api/v1/payments/{id}/:
+  /api/payments/{id}/:
     get:
-      operationId: v1_payments_retrieve
+      operationId: payments_retrieve
       description: Règlements du pressing connecté — tout le personnel authentifié.
       parameters:
       - in: path
@@ -989,7 +1206,7 @@ paths:
         description: Un(une) Chaîne UUID identifiant ce(cette) paiement.
         required: true
       tags:
-      - v1
+      - payments
       security:
       - jwtAuth: []
       responses:
@@ -999,12 +1216,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Paiement'
           description: ''
-  /api/v1/payments/client-balance/:
+  /api/payments/client-balance/:
     get:
-      operationId: v1_payments_client_balance_retrieve
+      operationId: payments_client_balance_retrieve
       description: 'Solde consolidé d''un client : ?client=<uuid> (fiche client).'
       tags:
-      - v1
+      - payments
       security:
       - jwtAuth: []
       responses:
@@ -1014,12 +1231,12 @@ paths:
               schema:
                 $ref: '#/components/schemas/Paiement'
           description: ''
-  /api/v1/payments/debtors/:
+  /api/payments/debtors/:
     get:
-      operationId: v1_payments_debtors_retrieve
+      operationId: payments_debtors_retrieve
       description: Clients du pressing ayant un solde débiteur > 0 (gérant).
       tags:
-      - v1
+      - payments
       security:
       - jwtAuth: []
       responses:
@@ -1029,12 +1246,261 @@ paths:
               schema:
                 $ref: '#/components/schemas/Paiement'
           description: ''
-  /api/v1/tenants/profile/:
+  /api/portal/catalog/:
     get:
-      operationId: v1_tenants_profile_retrieve
-      description: GET/PATCH /api/v1/tenants/profile/ — branding du pressing connecté.
+      operationId: portal_catalog_retrieve
+      description: GET /portal/catalog/ — tarifs actifs du pressing du client connecté.
+      parameters:
+      - in: header
+        name: X-Portal-Token
+        schema:
+          type: string
+      - in: query
+        name: pressing
+        schema:
+          type: string
+          format: uuid
+        description: ID du pressing pour une consultation publique du catalogue.
       tags:
-      - v1
+      - portal
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PortalCatalogItem'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/portal/collectes/:
+    post:
+      operationId: portal_collectes_create
+      description: Crée une demande de collecte; les prix sont lus depuis le catalogue
+        actif.
+      parameters:
+      - in: header
+        name: X-Portal-Token
+        schema:
+          type: string
+        required: true
+      tags:
+      - portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CollectionInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CollectionInputRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CollectionInputRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Commande'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/portal/login/:
+    post:
+      operationId: portal_login_create
+      description: Authentifie un compte client et renouvelle son jeton portail.
+      tags:
+      - portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PortalLoginRequestRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PortalLoginRequestRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PortalLoginRequestRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/portal/me/:
+    get:
+      operationId: portal_me_retrieve
+      description: Retourne le compte client et ses commandes avec un jeton X-Portal-Token
+        valide.
+      parameters:
+      - in: header
+        name: X-Portal-Token
+        schema:
+          type: string
+        required: true
+      tags:
+      - portal
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    delete:
+      operationId: portal_me_destroy
+      description: Révoque la session du portail client.
+      parameters:
+      - in: header
+        name: X-Portal-Token
+        schema:
+          type: string
+        required: true
+      tags:
+      - portal
+      security:
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /api/portal/orders/:
+    get:
+      operationId: portal_orders
+      description: 'Accès client public : valide le couple (n° de ticket, téléphone)
+        et retourne la fiche client avec toutes ses commandes.'
+      parameters:
+      - in: query
+        name: phone
+        schema:
+          type: string
+        required: true
+      - in: query
+        name: ticket
+        schema:
+          type: string
+        required: true
+      tags:
+      - portal
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/portal/pressings/:
+    get:
+      operationId: portal_pressings_list
+      description: Liste les pressings disponibles pour l'inscription client.
+      tags:
+      - portal
+      security:
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PortalPressing'
+          description: ''
+  /api/portal/register/:
+    post:
+      operationId: portal_register_create
+      description: Crée un compte portail et retourne son jeton de session.
+      tags:
+      - portal
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientRegisterInputRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ClientRegisterInputRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ClientRegisterInputRequest'
+        required: true
+      security:
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/tenants/profile/:
+    get:
+      operationId: tenants_profile_retrieve
+      description: GET/PATCH /api/tenants/profile/ — branding du pressing connecté.
+      tags:
+      - tenants
       security:
       - jwtAuth: []
       responses:
@@ -1045,10 +1511,10 @@ paths:
                 $ref: '#/components/schemas/Pressing'
           description: ''
     put:
-      operationId: v1_tenants_profile_update
-      description: GET/PATCH /api/v1/tenants/profile/ — branding du pressing connecté.
+      operationId: tenants_profile_update
+      description: GET/PATCH /api/tenants/profile/ — branding du pressing connecté.
       tags:
-      - v1
+      - tenants
       requestBody:
         content:
           application/json:
@@ -1071,10 +1537,10 @@ paths:
                 $ref: '#/components/schemas/Pressing'
           description: ''
     patch:
-      operationId: v1_tenants_profile_partial_update
-      description: GET/PATCH /api/v1/tenants/profile/ — branding du pressing connecté.
+      operationId: tenants_profile_partial_update
+      description: GET/PATCH /api/tenants/profile/ — branding du pressing connecté.
       tags:
-      - v1
+      - tenants
       requestBody:
         content:
           application/json:
@@ -1095,13 +1561,13 @@ paths:
               schema:
                 $ref: '#/components/schemas/Pressing'
           description: ''
-  /api/v1/tenants/register/:
+  /api/tenants/register/:
     post:
-      operationId: v1_tenants_register_create
+      operationId: tenants_register_create
       description: 'Inscrit un pressing et son utilisateur gérant en une requête atomique.
         Réponse : détails de l''établissement + paire de tokens JWT (`access` / `refresh`).'
       tags:
-      - v1
+      - tenants
       requestBody:
         content:
           application/json:
@@ -1165,6 +1631,29 @@ components:
       - name
       - phone_number
       - pressing
+    ClientRegisterInputRequest:
+      type: object
+      properties:
+        pressing:
+          type: string
+          format: uuid
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        phone:
+          type: string
+          minLength: 1
+          maxLength: 32
+        password:
+          type: string
+          writeOnly: true
+          minLength: 6
+      required:
+      - name
+      - password
+      - phone
+      - pressing
     ClientRequest:
       type: object
       properties:
@@ -1180,6 +1669,39 @@ components:
       required:
       - name
       - phone_number
+    CollectionInputRequest:
+      type: object
+      properties:
+        collect_address:
+          type: string
+          minLength: 1
+        creneau:
+          type: string
+          default: ''
+        notes:
+          type: string
+          default: ''
+        articles:
+          type: array
+          items:
+            $ref: '#/components/schemas/CollectionItemInputRequest'
+      required:
+      - articles
+      - collect_address
+    CollectionItemInputRequest:
+      type: object
+      properties:
+        clothing_type:
+          type: string
+          minLength: 1
+          maxLength: 100
+        quantity:
+          type: integer
+          maximum: 50
+          minimum: 1
+      required:
+      - clothing_type
+      - quantity
     Commande:
       type: object
       properties:
@@ -1835,6 +2357,29 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Paiement'
+    PaginatedTarifList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Tarif'
     PaginatedUserList:
       type: object
       required:
@@ -2012,6 +2557,26 @@ components:
           title: Couleur secondaire
           pattern: ^#[0-9A-Fa-f]{6}$
           maxLength: 7
+    PatchedTarifRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Article
+          maxLength: 100
+        category:
+          type: string
+          title: Catégorie
+          maxLength: 100
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          title: Prix (FCFA)
+        is_active:
+          type: boolean
+          title: Actif
     PaymentStatusEnum:
       enum:
       - PAYE
@@ -2022,6 +2587,49 @@ components:
         * `PAYE` - Payé
         * `PARTIEL` - Partiel
         * `CREDIT` - Crédit
+    PortalCatalogItem:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        category:
+          type: string
+        price:
+          type: string
+      required:
+      - category
+      - id
+      - name
+      - price
+    PortalLoginRequestRequest:
+      type: object
+      properties:
+        phone:
+          type: string
+          minLength: 1
+        password:
+          type: string
+          minLength: 1
+      required:
+      - password
+      - phone
+    PortalPressing:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        phone:
+          type: string
+      required:
+      - id
+      - name
+      - phone
     Pressing:
       type: object
       description: |-
@@ -2167,6 +2775,56 @@ components:
         * `PAYE` - Payé
         * `PARTIEL` - Partiel
         * `CREDIT` - Crédit
+    Tarif:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+        name:
+          type: string
+          title: Article
+          maxLength: 100
+        category:
+          type: string
+          title: Catégorie
+          maxLength: 100
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          title: Prix (FCFA)
+        is_active:
+          type: boolean
+          title: Actif
+      required:
+      - id
+      - name
+      - price
+    TarifRequest:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+          title: Article
+          maxLength: 100
+        category:
+          type: string
+          title: Catégorie
+          maxLength: 100
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          title: Prix (FCFA)
+        is_active:
+          type: boolean
+          title: Actif
+      required:
+      - name
+      - price
     TokenRefresh:
       type: object
       properties:

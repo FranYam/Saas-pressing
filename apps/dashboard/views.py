@@ -1,4 +1,4 @@
-"""Vue dashboard : GET /api/v1/dashboard/summary/ — gérant uniquement (Issue #12).
+"""Vue dashboard : GET /api/dashboard/summary/ — gérant uniquement (Issue #12).
 
 Les statistiques financières ne sont JAMAIS accessibles aux employés ni
 aux coursiers (critère d'acceptation).

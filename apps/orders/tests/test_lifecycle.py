@@ -104,7 +104,7 @@ class TicketOnCreateTests(TestCase):
 
 
 class StatusTransitionTests(TestCase):
-    """PATCH /api/v1/orders/<id>/update_status/ — transitions validées."""
+    """PATCH /api/orders/<id>/update_status/ — transitions validées."""
 
     def setUp(self):
         self.client = APIClient()

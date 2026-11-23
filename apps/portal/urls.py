@@ -1,4 +1,4 @@
-"""Routes du portail client — montées sous /api/v1/portal/."""
+"""Routes du portail client — montées sous /api/portal/."""
 from django.urls import path
 
 from apps.portal.views import (

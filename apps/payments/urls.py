@@ -1,4 +1,4 @@
-"""Routes payments — montées sous /api/v1/payments/."""
+"""Routes payments — montées sous /api/payments/."""
 from rest_framework.routers import DefaultRouter
 
 from apps.payments.views import PaiementViewSet

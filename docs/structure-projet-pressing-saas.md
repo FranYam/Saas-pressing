@@ -20,7 +20,7 @@ pressing_saas/
 │   │   ├── base.py            # settings communs
 │   │   ├── dev.py             # DEBUG=True, sqlite ou Neon dev branch
 │   │   └── prod.py            # DEBUG=False, Neon prod, sécurité, CORS strict
-│   ├── urls.py                # inclut les urls.py de chaque app sous /api/v1/...
+│   ├── urls.py                # inclut les urls.py de chaque app sous /api/...
 │   ├── wsgi.py
 │   └── asgi.py
 │
@@ -103,7 +103,7 @@ pressing_saas/
 - **`tenants/` séparé de `accounts/`** : le Pressing (établissement) et l'Utilisateur (personne) sont deux entités distinctes avec des cycles de vie différents (un pressing existe même si tu changes ses employés).
 - **`services.py`** dans les apps qui ont de la logique métier non triviale (calcul de solde, génération de ticket) : la vue reste fine (parsing requête + appel serializer + réponse), la logique métier est testable indépendamment de HTTP.
 - **`payments_gateway/` séparé de `payments/`** : `payments/` gère la donnée (modèle Paiement), `payments_gateway/` gère l'intégration externe fragile (API Orange/Moov, webhooks). Si un opérateur change son API, tu ne touches qu'un seul module.
-- Chaque app a son **`urls.py`** propre, monté dans `config/urls.py` avec un préfixe `/api/v1/<app>/` — ça prépare une v2 d'API sans casser l'existante (utile vu que la section 2.2 annonce des évolutions futures).
+- Chaque app a son **`urls.py`** propre, monté dans `config/urls.py` avec un préfixe `/api/<app>/` — ça prépare une v2 d'API sans casser l'existante (utile vu que la section 2.2 annonce des évolutions futures).
 
 ## Isolation multi-tenant (section 6.2)
 

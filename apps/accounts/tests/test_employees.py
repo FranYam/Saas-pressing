@@ -20,7 +20,7 @@ NEW_PASSWORD = fake_password()
 
 
 class EmployeeManagementTests(TestCase):
-    """CRUD /api/v1/accounts/employees/ — réservé au gérant du pressing."""
+    """CRUD /api/accounts/employees/ — réservé au gérant du pressing."""
 
     def setUp(self):
         self.client = APIClient()
@@ -169,7 +169,7 @@ class EmployeeManagementTests(TestCase):
 
 
 class MeEndpointTests(TestCase):
-    """GET /api/v1/accounts/me/ + claims personnalisés du JWT."""
+    """GET /api/accounts/me/ + claims personnalisés du JWT."""
 
     def setUp(self):
         self.client = APIClient()

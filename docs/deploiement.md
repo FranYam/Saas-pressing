@@ -134,16 +134,16 @@ curl -s -o /dev/null -w "%{http_code}\n" $BASE/api/schema/   # 200 attendu
 - Swagger : `https://…/api/schema/swagger-ui/`
 - Admin : `https://…/admin/` — créer le super-admin via l'onglet **Shell**
   de Render : `python manage.py createsuperuser`
-- Inscrire un pressing de test : `POST /api/v1/tenants/register/`, puis
+- Inscrire un pressing de test : `POST /api/tenants/register/`, puis
   vérifier dans l'admin que le logo atterrit bien sur R2 (URL `pub-xxxx.r2.dev/media/...`).
 
 ## Étape 5 — Brancher PWA et opérateurs
 
-- La PWA appelle `https://saas-pressing-api.onrender.com/api/v1/...`
+- La PWA appelle `https://saas-pressing-api.onrender.com/api/...`
   (mettre à jour `CORS_ALLOWED_ORIGINS` avec l'URL définitive).
 - Webhooks Mobile Money à déclarer auprès des opérateurs :
-  - Orange : `https://…/api/v1/payments-gateway/webhook/orange/`
-  - Moov : `https://…/api/v1/payments-gateway/webhook/moov/`
+  - Orange : `https://…/api/payments-gateway/webhook/orange/`
+  - Moov : `https://…/api/payments-gateway/webhook/moov/`
 - Passerelle SMS : renseigner `SMS_API_URL`, `SMS_API_KEY`, `SMS_SENDER_ID`
   (tant que vides : SMS simulés et journalisés).
 

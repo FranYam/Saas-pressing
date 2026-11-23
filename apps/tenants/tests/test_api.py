@@ -30,7 +30,7 @@ def logo_upload():
 
 
 class PressingRegisterTests(TestCase):
-    """POST /api/v1/tenants/register/ — critique d'acceptation : 201 + détails."""
+    """POST /api/tenants/register/ — critique d'acceptation : 201 + détails."""
 
     def setUp(self):
         self.client = APIClient()
@@ -111,7 +111,7 @@ class PressingRegisterTests(TestCase):
 
 @override_settings(MEDIA_ROOT=tempfile.mkdtemp(prefix="pressing_tests_media_"))
 class PressingProfileTests(TestCase):
-    """GET/PATCH /api/v1/tenants/profile/ — theming PWA + RBAC sur la marque.
+    """GET/PATCH /api/tenants/profile/ — theming PWA + RBAC sur la marque.
 
     MEDIA_ROOT redirigé vers un dossier temporaire : les logos uploadés
     pendant les tests ne polluent jamais le media/ du projet.

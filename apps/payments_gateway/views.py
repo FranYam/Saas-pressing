@@ -19,7 +19,7 @@ from apps.payments_gateway.services import initiate_mobile_money_payment
 
 
 class InitiateMobileMoneyView(APIView):
-    """POST /api/v1/payments-gateway/initiate/ — déclenche un push USSD/STK."""
+    """POST /api/payments-gateway/initiate/ — déclenche un push USSD/STK."""
 
     permission_classes = [IsAuthenticated]
 

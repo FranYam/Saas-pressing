@@ -1,4 +1,4 @@
-"""Routes deliveries — montées sous /api/v1/deliveries/."""
+"""Routes deliveries — montées sous /api/deliveries/."""
 from rest_framework.routers import DefaultRouter
 
 from apps.deliveries.views import CourierViewSet

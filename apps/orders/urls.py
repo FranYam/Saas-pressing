@@ -1,4 +1,4 @@
-"""Routes orders — montées sous /api/v1/orders/."""
+"""Routes orders — montées sous /api/orders/."""
 from rest_framework.routers import DefaultRouter
 
 from apps.orders.views import CommandeViewSet

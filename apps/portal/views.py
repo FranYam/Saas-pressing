@@ -11,7 +11,8 @@ révoqué à la déconnexion — il vaut pour un seul client, tous pressings.
 """
 from django.contrib.auth.hashers import make_password
 from django.db.models import Sum
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import OpenApiParameter, OpenApiTypes, extend_schema, inline_serializer
+from rest_framework import serializers
 from rest_framework import status
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -87,6 +88,20 @@ class PressingListView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        responses={
+            200: inline_serializer(
+                name="PortalPressing",
+                fields={
+                    "id": serializers.UUIDField(),
+                    "name": serializers.CharField(),
+                    "phone": serializers.CharField(),
+                },
+                many=True,
+            )
+        },
+        description="Liste les pressings disponibles pour l'inscription client.",
+    )
     def get(self, request):
         return Response(
             [{"id": p.id, "name": p.name, "phone": p.phone} for p in Pressing.objects.all()]
@@ -106,6 +121,11 @@ class ClientRegisterView(APIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "portal_register"
 
+    @extend_schema(
+        request=ClientRegisterInputSerializer,
+        responses={201: OpenApiTypes.OBJECT, 400: OpenApiTypes.OBJECT, 409: OpenApiTypes.OBJECT},
+        description="Crée un compte portail et retourne son jeton de session.",
+    )
     def post(self, request):
         serializer = ClientRegisterInputSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -139,6 +159,14 @@ class ClientLoginView(APIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "portal_login"
 
+    @extend_schema(
+        request=inline_serializer(
+            name="PortalLoginRequest",
+            fields={"phone": serializers.CharField(), "password": serializers.CharField()},
+        ),
+        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT},
+        description="Authentifie un compte client et renouvelle son jeton portail.",
+    )
     def post(self, request):
         phone = request.data.get("phone") or ""
         password = request.data.get("password") or ""
@@ -165,12 +193,30 @@ class ClientMeView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "X-Portal-Token", OpenApiTypes.STR, OpenApiParameter.HEADER, required=True
+            ),
+        ],
+        responses={200: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT},
+        description="Retourne le compte client et ses commandes avec un jeton X-Portal-Token valide.",
+    )
     def get(self, request):
         client = client_from_token(request)
         if not client:
             return Response({"detail": "Session expirée — reconnectez-vous."}, status=401)
         return Response(_client_payload(client))
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "X-Portal-Token", OpenApiTypes.STR, OpenApiParameter.HEADER, required=True
+            ),
+        ],
+        responses={204: None},
+        description="Révoque la session du portail client.",
+    )
     def delete(self, request):
         """Déconnexion : révoque le jeton."""
         client = client_from_token(request)
@@ -190,6 +236,32 @@ class PortalCatalogView(APIView):
     permission_classes = [AllowAny]
     authentication_classes = []
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "X-Portal-Token", OpenApiTypes.STR, OpenApiParameter.HEADER, required=False
+            ),
+            OpenApiParameter(
+                name="pressing",
+                type=OpenApiTypes.UUID,
+                location=OpenApiParameter.QUERY,
+                required=False,
+                description="ID du pressing pour une consultation publique du catalogue.",
+            ),
+        ],
+        responses={
+            200: inline_serializer(
+                name="PortalCatalogItem",
+                fields={
+                    "id": serializers.UUIDField(),
+                    "name": serializers.CharField(),
+                    "category": serializers.CharField(),
+                    "price": serializers.CharField(),
+                },
+            ),
+            400: OpenApiTypes.OBJECT,
+        },
+    )
     def get(self, request):
         client = client_from_token(request)
         pressing = client.pressing if client else None
@@ -217,6 +289,16 @@ class PortalCollecteView(APIView):
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "portal_collecte"
 
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                "X-Portal-Token", OpenApiTypes.STR, OpenApiParameter.HEADER, required=True
+            ),
+        ],
+        request=CollectionInputSerializer,
+        responses={201: CommandeSerializer, 400: OpenApiTypes.OBJECT, 401: OpenApiTypes.OBJECT},
+        description="Crée une demande de collecte; les prix sont lus depuis le catalogue actif.",
+    )
     def post(self, request):
         client = client_from_token(request)
         if not client:
@@ -235,7 +317,7 @@ class PortalCollecteView(APIView):
 # ---------------------------------------------------------------------------
 
 class ClientPortalView(APIView):
-    """GET /api/v1/portal/orders/?ticket=PR-0001&phone=+226 70 12 34 56
+    """GET /api/portal/orders/?ticket=PR-0001&phone=+226 70 12 34 56
 
     - 200 : fiche client + commandes (avec montant déjà payé par commande)
     - 400 : paramètres manquants
@@ -249,6 +331,10 @@ class ClientPortalView(APIView):
     throttle_scope = "portal_lookup"
 
     @extend_schema(
+        parameters=[
+            OpenApiParameter("ticket", OpenApiTypes.STR, OpenApiParameter.QUERY, required=True),
+            OpenApiParameter("phone", OpenApiTypes.STR, OpenApiParameter.QUERY, required=True),
+        ],
         operation_id="portal_orders",
         description=(
             "Accès client public : valide le couple (n° de ticket, téléphone) "

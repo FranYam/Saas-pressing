@@ -68,28 +68,28 @@ docs/                 architecture, backlog, schéma OpenAPI
 
 | Méthode | Endpoint | Accès | Description |
 |---|---|---|---|
-| POST | `/api/v1/tenants/register/` | Public | Inscrit un pressing + son gérant (atomique), retourne JWT |
-| GET | `/api/v1/tenants/profile/` | Authentifié | Branding du pressing (theming PWA) |
-| PATCH | `/api/v1/tenants/profile/` | Gérant | Customisation logo / couleurs |
-| POST | `/api/v1/accounts/login/` | Public | JWT (téléphone + mot de passe), claims `role`/`pressing_id` |
-| POST | `/api/v1/accounts/login/refresh/` · `/verify/` | Public | Cycle de vie des tokens |
-| GET | `/api/v1/accounts/me/` | Authentifié | Profil de l'utilisateur connecté |
-| CRUD | `/api/v1/accounts/employees/` | Gérant | Équipe du pressing (DELETE = désactivation) |
-| CRUD | `/api/v1/clients/` | Authentifié | Répertoire clients du pressing (`?search=` par préfixe téléphone ou nom) |
-| GET/POST | `/api/v1/orders/` | Authentifié | Commandes + articles imbriqués (`?status=`, `?client=`, total calculé serveur) |
-| PATCH | `/api/v1/orders/{id}/update_status/` | Authentifié | Cycle `RECU→EN_TRAITEMENT→PRET→LIVRE` validé (reçu texte inclus) |
-| GET/POST | `/api/v1/payments/` | Authentifié | Règlements (statut calculé serveur, immuables, `?commande=`) |
-| GET | `/api/v1/payments/client-balance/?client=` | Authentifié | Solde consolidé du client (dû, payé, reste, détail) |
-| GET | `/api/v1/payments/debtors/` | Gérant | Clients avec créance > 0 |
-| POST | `/api/v1/payments-gateway/initiate/` | Authentifié | Push Mobile Money (Orange/Moov) sur le reste à payer |
-| POST | `/api/v1/payments-gateway/webhook/{operator}/` | Public + HMAC-SHA256 | Confirmation opérateur (idempotente, montant vérifié) |
-| GET | `/api/v1/payments-gateway/requests/` | Authentifié | Suivi des demandes Mobile Money du pressing |
+| POST | `/api/tenants/register/` | Public | Inscrit un pressing + son gérant (atomique), retourne JWT |
+| GET | `/api/tenants/profile/` | Authentifié | Branding du pressing (theming PWA) |
+| PATCH | `/api/tenants/profile/` | Gérant | Customisation logo / couleurs |
+| POST | `/api/accounts/login/` | Public | JWT (téléphone + mot de passe), claims `role`/`pressing_id` |
+| POST | `/api/accounts/login/refresh/` · `/verify/` | Public | Cycle de vie des tokens |
+| GET | `/api/accounts/me/` | Authentifié | Profil de l'utilisateur connecté |
+| CRUD | `/api/accounts/employees/` | Gérant | Équipe du pressing (DELETE = désactivation) |
+| CRUD | `/api/clients/` | Authentifié | Répertoire clients du pressing (`?search=` par préfixe téléphone ou nom) |
+| GET/POST | `/api/orders/` | Authentifié | Commandes + articles imbriqués (`?status=`, `?client=`, total calculé serveur) |
+| PATCH | `/api/orders/{id}/update_status/` | Authentifié | Cycle `RECU→EN_TRAITEMENT→PRET→LIVRE` validé (reçu texte inclus) |
+| GET/POST | `/api/payments/` | Authentifié | Règlements (statut calculé serveur, immuables, `?commande=`) |
+| GET | `/api/payments/client-balance/?client=` | Authentifié | Solde consolidé du client (dû, payé, reste, détail) |
+| GET | `/api/payments/debtors/` | Gérant | Clients avec créance > 0 |
+| POST | `/api/payments-gateway/initiate/` | Authentifié | Push Mobile Money (Orange/Moov) sur le reste à payer |
+| POST | `/api/payments-gateway/webhook/{operator}/` | Public + HMAC-SHA256 | Confirmation opérateur (idempotente, montant vérifié) |
+| GET | `/api/payments-gateway/requests/` | Authentifié | Suivi des demandes Mobile Money du pressing |
 | — | `python manage.py send_reminders` | Cron / celery-beat | Relance SMS : linge prêt non retiré > 7 jours |
-| CRUD | `/api/v1/deliveries/couriers/` | Gérant (écriture) | Coursiers + compte de connexion (rôle COURSIER) |
-| PATCH | `/api/v1/orders/{id}/assign-courier/` | Gérant | Assigne un coursier à la commande |
-| GET | `/api/v1/orders/my-deliveries/` | Coursier | Uniquement SES livraisons assignées |
-| PATCH | `/api/v1/orders/{id}/update-delivery/` | Coursier assigné / gérant | Cycle `A_COLLECTER→COLLECTE→A_LIVRER→LIVRE` |
-| GET | `/api/v1/dashboard/summary/` | Gérant | KPIs temps réel : CA jour/mois, commandes, créances, non réclamés |
+| CRUD | `/api/deliveries/couriers/` | Gérant (écriture) | Coursiers + compte de connexion (rôle COURSIER) |
+| PATCH | `/api/orders/{id}/assign-courier/` | Gérant | Assigne un coursier à la commande |
+| GET | `/api/orders/my-deliveries/` | Coursier | Uniquement SES livraisons assignées |
+| PATCH | `/api/orders/{id}/update-delivery/` | Coursier assigné / gérant | Cycle `A_COLLECTER→COLLECTE→A_LIVRER→LIVRE` |
+| GET | `/api/dashboard/summary/` | Gérant | KPIs temps réel : CA jour/mois, commandes, créances, non réclamés |
 
 SMS automatiques : passage `PRET` → SMS au client (nom du pressing + ticket), journalisés dans `SmsNotification` (SIMULATED si passerelle non configurée, `tasks.py` prête pour Celery).
 

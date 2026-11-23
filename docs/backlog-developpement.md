@@ -59,7 +59,7 @@ Ce document contient un plan de développement étape par étape, découpé sous
 * **Description** : Concevoir la brique centrale d'isolation de données. Chaque pressing (tenant) doit voir uniquement ses propres ressources [16, 22].
 * **Spécifications Techniques** :
   * **Database** : Préparer l'approche multi-tenant single-database. Chaque modèle métier (Client, Commande, Paiement, Coursier, User) contiendra une clé étrangère (`FK`) vers l'entité `Pressing` [22].
-  * **Backend** : 
+  * **Backend** :
     * Créer l'application Django `core/`.
     * Implémenter un `TenantScopedQuerysetMixin` dans `core/mixins.py` pour filtrer automatiquement les querysets sur `request.user.pressing` [22].
     * Implémenter une permission personnalisée `IsSameTenant` dans `core/permissions.py` qui vérifie que l'objet demandé appartient bien au pressing de l'utilisateur connecté [22].
@@ -95,7 +95,7 @@ Ce document contient un plan de développement étape par étape, découpé sous
 * **Spécifications Techniques** :
   * **Database** : Modèle `Pressing` [17] :
     * `id` (UUID), `nom` (VARCHAR), `adresse` (TEXT), `telephone` (VARCHAR), `proprietaire` (VARCHAR), `logo` (IMAGE/URL), `couleur_primaire` (VARCHAR), `couleur_secondaire` (VARCHAR) [17].
-  * **Backend** : Application `tenants/` [21]. Créer `models.py`, `serializers.py`, `views.py`, et `urls.py`. Point de terminaison public d'inscription `/api/v1/tenants/register/` permettant de créer simultanément le pressing et son utilisateur gérant.
+  * **Backend** : Application `tenants/` [21]. Créer `models.py`, `serializers.py`, `views.py`, et `urls.py`. Point de terminaison public d'inscription `/api/tenants/register/` permettant de créer simultanément le pressing et son utilisateur gérant.
   * **UI / PWA** : Écran d'inscription simple en français permettant de renseigner le nom du pressing, télécharger un logo et sélectionner des couleurs primaires/secondaires [12, 14]. Stockage local des paramètres visuels pour les appliquer à l'interface [12].
 * **Tâches à réaliser** :
   1. Développer le modèle `Pressing` dans `tenants/models.py`.
@@ -118,7 +118,7 @@ Ce document contient un plan de développement étape par étape, découpé sous
 * **Tâches à réaliser** :
   1. Créer `accounts/models.py` avec le modèle `User` personnalisé.
   2. Configurer JWT dans `settings/base.py` pour utiliser le numéro de téléphone et le mot de passe pour l'authentification.
-  3. Développer les endpoints `/api/v1/accounts/login/` et `/api/v1/accounts/employees/` (pour que le gérant puisse ajouter un employé au pressing connecté) [9].
+  3. Développer les endpoints `/api/accounts/login/` et `/api/accounts/employees/` (pour que le gérant puisse ajouter un employé au pressing connecté) [9].
   4. Mettre en place un middleware d'authentification ou configurer DRF pour exiger l'authentification par défaut sur tous les endpoints sauf l'inscription.
 * **Critères d'acceptation** :
   * Un employé se connecte via son numéro de téléphone et son mot de passe.
@@ -135,7 +135,7 @@ Ce document contient un plan de développement étape par étape, découpé sous
 * **Spécifications Techniques** :
   * **Database** : Modèle `Client` [17] :
     * `id` (UUID), `nom` (VARCHAR), `telephone` (VARCHAR), `pressing` (FK vers Pressing) [17]. Clé unique composite sur (telephone, pressing) pour qu'un client soit unique au sein d'un même pressing.
-  * **Backend** : Application `clients/` [21]. Endpoint GET `/api/v1/clients/?search=<telephone>` héritant de `TenantScopedQuerysetMixin` [22].
+  * **Backend** : Application `clients/` [21]. Endpoint GET `/api/clients/?search=<telephone>` héritant de `TenantScopedQuerysetMixin` [22].
   * **UI / PWA** : Formulaire de saisie d'un nouveau client et champ de recherche dynamique en haut de l'écran de caisse.
 * **Tâches à réaliser** :
   1. Créer l'application `clients/` et définir le modèle `Client`.
@@ -180,8 +180,8 @@ Ce document contient un plan de développement étape par étape, découpé sous
 * **Spécifications Techniques** :
   * **Backend** :
     * Implémenter une fonction de génération de ticket (ex: Format court "TX-2608-001" réinitialisé mensuellement) dans un module `services.py` au sein de l'application `orders/` pour séparer la logique de la vue [21].
-    * Endpoint PATCH `/api/v1/orders/<id>/update_status/` permettant de faire progresser le statut [9].
-  * **UI / PWA** : 
+    * Endpoint PATCH `/api/orders/<id>/update_status/` permettant de faire progresser le statut [9].
+  * **UI / PWA** :
     * Vue de liste des commandes en attente avec filtres par statut.
     * Affichage du reçu/ticket optimisé pour impression thermique (format 58mm ou 80mm) ou partage rapide (WhatsApp / SMS) [6].
 * **Tâches à réaliser** :
@@ -202,7 +202,7 @@ Ce document contient un plan de développement étape par étape, découpé sous
 * **Spécifications Techniques** :
   * **Database** : Modèle `Paiement` [17] :
     * `id` (UUID), `commande` (FK Commande), `montant` (DECIMAL), `mode` (CHOICES: 'ESPECES', 'MOBILE_MONEY', 'CREDIT'), `date` (DATETIME), `statut` (CHOICES: 'PAYE', 'PARTIEL', 'CREDIT') [17].
-  * **Backend** : Application `payments/` [21]. 
+  * **Backend** : Application `payments/` [21].
     * Créer `payments/services.py` pour centraliser le calcul du montant total payé par commande et le solde restant dû par un client donné [21].
     * Le calcul du solde dû (créances) doit consolider l'historique de toutes les commandes du client [10].
   * **UI / PWA** : Écran d'encaissement lors de la saisie de commande. Affichage proéminent du "Reste à payer" et de l'historique des créances sur la fiche client [10].
@@ -222,7 +222,7 @@ Ce document contient un plan de développement étape par étape, découpé sous
 * **Spécifications Techniques** :
   * **Backend** : Créer l'application `payments_gateway/` séparée de `payments/` [21].
     * `payments_gateway/` gère les appels d'API fragiles vers les opérateurs burkinabés [15, 21].
-    * Endpoint public non authentifié de réception de webhook : `/api/v1/payments-gateway/webhook/<operator>/` gérant la validation de signature pour éviter les fraudes.
+    * Endpoint public non authentifié de réception de webhook : `/api/payments-gateway/webhook/<operator>/` gérant la validation de signature pour éviter les fraudes.
     * Sur réception de la confirmation de l'opérateur, appeler la logique métier interne de `payments/services.py` pour enregistrer la transaction payée de manière sécurisée [14].
 * **Tâches à réaliser** :
   1. Créer l'application `payments_gateway/` [21].
@@ -262,10 +262,10 @@ Ce document contient un plan de développement étape par étape, découpé sous
 * **Spécifications Techniques** :
   * **Database** : Modèle `Coursier` [17] :
     * `id` (UUID), `nom` (VARCHAR), `telephone` (VARCHAR), `pressing` (FK Pressing) [17].
-  * **Backend** : 
+  * **Backend** :
     * Ajout des champs logistiques sur `Commande` : `adresse_collecte` (TEXT/GPS), `statut_livraison` (CHOICES: 'A_COLLECTER', 'COLLECTE', 'A_LIVRER', 'LIVRE'), `coursier_assigne` (FK Coursier) [17].
-    * Vues dédiées pour les coursiers : GET `/api/v1/orders/my-deliveries/` qui filtre les commandes par `coursier_assigne=request.user` [8].
-  * **UI / PWA** : 
+    * Vues dédiées pour les coursiers : GET `/api/orders/my-deliveries/` qui filtre les commandes par `coursier_assigne=request.user` [8].
+  * **UI / PWA** :
     * Formulaire client de demande de collecte avec saisie d'adresse textuelle et optionnelle de coordonnées GPS (utilisation de l'API de géolocalisation HTML5 de l'appareil mobile) [13, 15].
     * Interface mobile allégée pour le coursier, listant uniquement ses livraisons du jour et lui permettant de marquer un colis comme "Livré" en une interaction [8, 14].
 * **Tâches à réaliser** :
@@ -284,7 +284,7 @@ Ce document contient un plan de développement étape par étape, découpé sous
 * **Domaine** : API REST, UI/PWA
 * **Description** : Fournir une vue globale des performances de l'activité du jour, de la semaine ou du mois pour le gérant du pressing [6, 11].
 * **Spécifications Techniques** :
-  * **Backend** : Endpoint GET `/api/v1/dashboard/summary/` accessible uniquement aux utilisateurs ayant le rôle "Gérant" [12]. 
+  * **Backend** : Endpoint GET `/api/dashboard/summary/` accessible uniquement aux utilisateurs ayant le rôle "Gérant" [12].
     * Requêtes d'agrégation SQL (Django `django.db.models.Sum`, `Count`) pour compiler : le chiffre d'affaires cumulé du jour, le nombre de commandes en cours, l'encours total des créances clients et la liste des commandes non réclamées depuis longtemps [6, 11].
   * **UI / PWA** : Page d'accueil pour le profil Gérant présentant des indicateurs clés (KPIs) graphiques clairs et textuels, optimisée pour un chargement rapide [11, 14].
 * **Tâches à réaliser** :

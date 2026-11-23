@@ -18,13 +18,13 @@ User = get_user_model()
 
 
 class LoginView(TokenObtainPairView):
-    """POST /api/v1/accounts/login/ — paire de tokens JWT avec claims role + pressing_id."""
+    """POST /api/accounts/login/ — paire de tokens JWT avec claims role + pressing_id."""
 
     serializer_class = LoginSerializer
 
 
 class MeView(RetrieveAPIView):
-    """GET /api/v1/accounts/me/ — profil de l'utilisateur connecté (tous rôles)."""
+    """GET /api/accounts/me/ — profil de l'utilisateur connecté (tous rôles)."""
 
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated]

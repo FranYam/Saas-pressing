@@ -45,7 +45,7 @@ class OperatorClient:
             "currency": "XOF",
             "reference": reference,
             "callback_url": f"{api_url.rstrip('/').rsplit('/api', 1)[0]}"
-            "/api/v1/payments-gateway/webhook/"
+            "/api/payments-gateway/webhook/"
             f"{self.operator_id.lower()}/",
         }
         headers = {"Authorization": f"Bearer {self.config.get('API_KEY', '')}"}

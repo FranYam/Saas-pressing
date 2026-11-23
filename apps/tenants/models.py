@@ -15,7 +15,7 @@ class Pressing(UUIDModel, TimeStampedModel):
     Un établissement de pressing (tenant).
 
     La couleur primaire/secondaire et le logo sont consommés par la PWA via
-    GET /api/v1/tenants/profile/ (Issue #3) pour habiller dynamiquement
+    GET /api/tenants/profile/ (Issue #3) pour habiller dynamiquement
     l'interface par pressing.
     """
 

@@ -1,7 +1,7 @@
 """Vues tenants : inscription publique et profil de l'établissement.
 
 Le profil expose le branding (logo + couleurs) que la PWA récupère au
-chargement via GET /api/v1/tenants/profile/ pour habiller dynamiquement
+chargement via GET /api/tenants/profile/ pour habiller dynamiquement
 l'interface. La modification de la marque est réservée au gérant — un
 employé ne peut pas changer l'identité visuelle du pressing.
 """
@@ -23,7 +23,7 @@ from apps.tenants.services import register_pressing
 
 
 class PressingRegisterView(APIView):
-    """POST /api/v1/tenants/register/ — inscription publique (pressing + gérant)."""
+    """POST /api/tenants/register/ — inscription publique (pressing + gérant)."""
 
     permission_classes = [AllowAny]
 
@@ -59,7 +59,7 @@ class PressingRegisterView(APIView):
 
 
 class PressingProfileView(RetrieveUpdateAPIView):
-    """GET/PATCH /api/v1/tenants/profile/ — branding du pressing connecté."""
+    """GET/PATCH /api/tenants/profile/ — branding du pressing connecté."""
 
     serializer_class = PressingSerializer
     permission_classes = [IsAuthenticated]

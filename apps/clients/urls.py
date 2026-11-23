@@ -1,4 +1,4 @@
-"""Routes clients — montées sous /api/v1/clients/."""
+"""Routes clients — montées sous /api/clients/."""
 from rest_framework.routers import DefaultRouter
 
 from apps.clients.views import ClientViewSet
