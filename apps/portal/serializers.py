@@ -14,6 +14,7 @@ class ClientRegisterInputSerializer(serializers.Serializer):
     def validate_phone(self, value):
         return clean_phone(value)
 
+
 class CollectionItemInputSerializer(serializers.Serializer):
     clothing_type = serializers.CharField(max_length=100, trim_whitespace=True)
     quantity = serializers.IntegerField(min_value=1, max_value=50)

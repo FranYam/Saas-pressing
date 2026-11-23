@@ -12,7 +12,9 @@ from apps.orders.services import create_commande
 
 
 @transaction.atomic
-def create_collection_order(*, client: Client, address: str, slot: str, notes: str, items: list[dict]):
+def create_collection_order(
+    *, client: Client, address: str, slot: str, notes: str, items: list[dict]
+):
     """Create a home collection using current prices from this client's catalog."""
     tariffs = {
         tariff.name: tariff
@@ -25,7 +27,11 @@ def create_collection_order(*, client: Client, address: str, slot: str, notes: s
         if tariff is None:
             raise ValidationError({"articles": f"{name} n'est pas au catalogue."})
         priced_items.append(
-            {"clothing_type": tariff.name, "quantity": item["quantity"], "unit_price": tariff.price}
+            {
+                "clothing_type": tariff.name,
+                "quantity": item["quantity"],
+                "unit_price": tariff.price,
+            }
         )
 
     address_parts = [address]
